@@ -40,5 +40,4 @@ set_source_files_properties(
 file(GLOB LIBS_A "${Boost_LIBRARY_DIR}/*filesystem.a")
 file(GLOB LIBS_SO "${Boost_LIBRARY_DIR}/*filesystem.so")
 
-target_link_libraries(reader ${LIBS_A})
-target_link_libraries(mc ${LIBS_SO})
+target_link_libraries(DCE_cpp ${LIBS_A} ${LIBS_SO})

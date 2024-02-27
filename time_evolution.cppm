@@ -5,15 +5,17 @@
 export module time_evolution;
 #include <complex>
 #include <string>
+#include <Eigen/Sparse>
 
+export class matricesHolder{
 
-export class matricesHolder{};
+};
 
 export class DCE{
 
 public:
     //parameters that need to be initialized
-    int rowNum=-1;//row number of parameters to be read
+    int row=-1;//row number of parameters to be read
     int group=-1;//computation group
     int j1H=-1;//initial photon number
     int j2H=-1;//initial phonon number
@@ -26,10 +28,10 @@ public:
 public:
 
     ///
-    /// @param csvFileName corresponding to a group
+    /// @param groupNum corresponding to a group
     /// @param r row number
     /// use parseCSV() to initialize the variables
-    void parseCSV(const std::string &csvFileName,const int& r);
+    void parseCSV(const int& groupNum,const int& r);
 
 };
 

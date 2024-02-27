@@ -16,9 +16,11 @@ if (Boost_NO_SYSTEM_PATHS)
     set(Boost_LIBRARY_DIR "/home/polya/cppLocal/boostBuild/lib")
 endif (Boost_NO_SYSTEM_PATHS)
 
-add_executable(DCE_cpp main.cpp timeEvolution.cpp
-        time_evolution.cppm)
+add_executable(DCE main.cpp timeEvolution.cpp
+        )
 find_package(Boost  REQUIRED filesystem)
+
+
 
 if(Boost_FOUND)
     message(STATUS "boost root is: ${Boost_ROOT}")
@@ -40,4 +42,4 @@ set_source_files_properties(
 file(GLOB LIBS_A "${Boost_LIBRARY_DIR}/*filesystem.a")
 file(GLOB LIBS_SO "${Boost_LIBRARY_DIR}/*filesystem.so")
 
-target_link_libraries(DCE_cpp ${LIBS_A} ${LIBS_SO})
+target_link_libraries(DCE ${LIBS_A} ${LIBS_SO})

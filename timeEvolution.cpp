@@ -12,7 +12,7 @@ void DCE_Evolution::parseCSV(const int &group, const int &row) {
 std::string commandToReadCSV="python3 readCSV.py "+std::to_string(group)+" "+std::to_string(row);
 
 std::string result=this->execPython(commandToReadCSV.c_str());
-    std::cout<<result<<std::endl;
+//    std::cout<<result<<std::endl;
 
     std::regex pattern_j1H("j1H(\\d+)j2H");
     std::smatch  match_j1H;
@@ -59,7 +59,33 @@ std::string result=this->execPython(commandToReadCSV.c_str());
     }
 
     std::regex pattern_thetaCoef("thetaCoef([+-]?\\d+(\\.\\d+)?)");
-
+    std::smatch  match_thetaCoef;
+    if (std::regex_search(result,match_thetaCoef,pattern_thetaCoef)){
+        this->thetaCoef=std::stod(match_thetaCoef[1].str());
+    }
+//    std::cout<<"jH1="<<jH1<<std::endl;
+//
+//    std::cout<<"jH2="<<jH2<<std::endl;
+//
+//    std::cout<<"g0="<<g0<<std::endl;
+//
+//    std::cout<<"omegam="<<omegam<<std::endl;
+//
+//    std::cout<<"omegac="<<omegac<<std::endl;
+//
+//    std::cout<<"omegap="<<omegap<<std::endl;
+//
+//    std::cout<<"er="<<er<<std::endl;
+//
+//    std::cout<<"thetaCoef="<<thetaCoef<<std::endl;
+      double e2r=std::pow(er,2);
+      double eM2r=1/e2r;
+      this->Deltam=this->omegam-this->omegap;
+      this->lmd=(e2r-eM2r)/(e2r+eM2r)*Deltam;
+      this->theta=thetaCoef*PI;
+//      std::cout<<"lambda="<<lmd<<std::endl;
+//      std::cout<<"theta="<<theta<<std::endl;
+//      std::cout<<"Deltam="<<Deltam<<std::endl;
 
 
 
@@ -67,7 +93,7 @@ std::string result=this->execPython(commandToReadCSV.c_str());
 
 
 std::string DCE_Evolution::execPython(const char *cmd) {
-    std::array<char, 2048> buffer; // Buffer to store command output
+    std::array<char, 4096> buffer; // Buffer to store command output
     std::string result; // String to accumulate output
 
     // Open a pipe to read the output of the executed command
@@ -85,4 +111,15 @@ std::string DCE_Evolution::execPython(const char *cmd) {
 
 }
 
+
+
+///This function initializes the sparse matrices
+void DCE_Evolution::populatedMatrices(){
+    //initialize identity matrix
+    for(int i=0;i<N1*N2;i++){
+        this->IN1N2.insert(i,i)=1;
+    }
+
+
+}
 

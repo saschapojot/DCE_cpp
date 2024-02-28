@@ -14,9 +14,14 @@ oneRow=dfstr.iloc[rowNum,:]
 
 j1H=int(oneRow.loc["j1H"])
 j2H=int(oneRow.loc["j2H"])
-g0=oneRow.loc["g0"]
-omegam=oneRow.loc["omegam"]
-omegap=oneRow.loc["omegap"]
-er=oneRow.loc["er"]#magnification
-print("j1H"+str(j1H)+"j2H"+str(j2H)+"g0"+str(g0)+"omegam"+str(omegam)+"omegap"+str(omegap))
+g0=float(oneRow.loc["g0"])
+omegam=float(oneRow.loc["omegam"])
+omegap=float(oneRow.loc["omegap"])
+omegac=float(oneRow.loc["omegac"])
+er=float(oneRow.loc["er"])#magnification
+
+thetaCoef=float(oneRow.loc["thetaCoef"])
+
+print("j1H"+str(j1H)+"j2H"+str(j2H)+"g0"+str(g0)\
+      +"omegam"+str(omegam)+"omegap"+str(omegap)+"omegac"+str(omegac)+"er"+str(er)+"thetaCoef"+str(thetaCoef))
 

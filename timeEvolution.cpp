@@ -116,10 +116,54 @@ std::string DCE_Evolution::execPython(const char *cmd) {
 ///This function initializes the sparse matrices
 void DCE_Evolution::populatedMatrices(){
     //initialize identity matrix
-    for(int i=0;i<N1*N2;i++){
-        this->IN1N2.insert(i,i)=1;
+    this->IN1N2=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
+    for (int i=0;i<N1*N2;i++){
+        this->IN1N2.insert(i,i)=1.0;
     }
 
+//    this->D2=Eigen::SparseMatrix<std::complex<double>>(N2,N2);
+//    for(int n2=0;n2<N2;n2++){
+//        D2.insert(n2,n2)=this->x2ValsAll[n2];
+//    }
+
+    //initialize H0
+    this->H0=(-0.5*omegac-0.5*Deltam)*this->IN1N2;
+
+    //initialize H2
+    this->H2=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
+    for(int n1=0;n1<N1;n1++) {
+
+        for (int n2 = 0; n2 < N2; n2++) {
+            this->H2.insert(n1 * N2 + n2, n1 * N2 + n2) = std::pow(this->x1ValsAll[n1], 2);
+
+        }
+    }
+    H2*=0.5*std::pow(omegac,2);
+
+    //initialize H3
+    this->H3=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
+
+    std::vector<std::complex<double>> S2Diag;
+    for (int n2=0;n2<N2;n2++){
+        S2Diag.push_back(std::pow(this->x2ValsAll[n2],2));
+    }
+
+    for(int n1=0;n1<N1;n1++){
+        for(int n2=0;n2<N2;n2++){
+
+            this->H3.insert(n1*N2+n2,n1*N2+n2)=S2Diag[n2];
+        }
+
+    }
+    H3*=(0.5*lmd*std::cos(theta)+0.5*Deltam*omegam);
+
+    //initialize H6
+    this->H6=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
+    //fill in diagonal values
+    for (int i=0;i<N1*N2;i++){
+        this->H6.insert(i,i)=1.0;
+    }
+    //fill in super-block-diagonal
 
 }
 

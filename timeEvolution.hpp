@@ -42,6 +42,10 @@ public:
 //        std::cout<<"M="<<M<<std::endl;
 //        std::cout<<"x1vec has size "<<x1ValsAll.size()<<std::endl;
 //        std::cout<<"x2vec has size "<<x2ValsAll.size()<<std::endl;
+
+
+            
+
     }
 
 public:
@@ -78,6 +82,13 @@ public:
     std::vector<double> x2ValsAll;
 
     Eigen::SparseMatrix<std::complex<double>> IN1N2;
+//    Eigen::SparseMatrix<std::complex<double>>IN2;
+//    Eigen::SparseMatrix<std::complex<double>> D2;
+    Eigen::SparseMatrix<std::complex<double>> H0;
+    Eigen::SparseMatrix<std::complex<double>> H2;
+//    Eigen::SparseMatrix<std::complex<double>> S2;
+    Eigen::SparseMatrix<std::complex<double>> H3;
+    Eigen::SparseMatrix<std::complex<double>> H6;
 
 
     ///

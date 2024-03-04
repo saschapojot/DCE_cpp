@@ -161,9 +161,20 @@ void DCE_Evolution::populatedMatrices(){
     this->H6=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
     //fill in diagonal values
     for (int i=0;i<N1*N2;i++){
-        this->H6.insert(i,i)=1.0;
+        this->H6.insert(i,i)=-2.0;
     }
     //fill in super-block-diagonal
+    Eigen::SparseMatrix<std::complex<double>> H6Upper(N1*N2,N1*N2);
+    for (int i=0;i<(N1-1)*N2;i++){
+        H6Upper.insert(i,i+N2)=1.0;
+    }
+    Eigen::SparseMatrix<std::complex<double>> H6Lower=H6Upper.transpose();
+    H6+=H6Upper;
+    H6+=H6Lower;
+//    std::cout<<"H6 block="<<H6<<std::endl;
+    H6*=-1.0/(std::pow(dx1,2));
+//        std::cout<<"H6 block="<<H6<<std::endl;
 
-}
+
+}//end of populate matrices
 

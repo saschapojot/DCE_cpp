@@ -63,7 +63,7 @@ public:
     double lmd=0;
     double Deltam=0;
 
-     const int N1=2;//500;
+     const int N1=3;//500;
      const int N2=2;//2048;
     double L1=5;
     double L2=40;

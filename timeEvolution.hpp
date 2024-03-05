@@ -43,10 +43,22 @@ public:
 //        std::cout<<"x1vec has size "<<x1ValsAll.size()<<std::endl;
 //        std::cout<<"x2vec has size "<<x2ValsAll.size()<<std::endl;
 
+    }//end of constructor
 
-            
+    ///
+    /// @param j index of time
+    /// @return H1j
+    Eigen::SparseMatrix<std::complex<double>> H1Val(const int & j);
 
-    }
+    ///
+    /// @param j  index of time
+    /// @return H4j
+    Eigen::SparseMatrix<std::complex<double>> H4Val(const int & j);
+
+    ///
+    /// @param j index of time
+    /// @return H5j
+    Eigen::SparseMatrix<std::complex<double>>H5Val(const int& j);
 
 public:
     int jH1 = -1;
@@ -63,8 +75,8 @@ public:
     double lmd=0;
     double Deltam=0;
 
-     const int N1=3;//500;
-     const int N2=2;//2048;
+     const int N1=4;//500;
+     const int N2=3;//2048;
     double L1=5;
     double L2=40;
 
@@ -78,6 +90,7 @@ public:
     int M=static_cast<int>(std::ceil(tTotPerFlush/dtEst));
     double dt=tTotPerFlush/(static_cast<double>(M) );
 
+
     std::vector<double> x1ValsAll;
     std::vector<double> x2ValsAll;
 
@@ -89,8 +102,12 @@ public:
 //    Eigen::SparseMatrix<std::complex<double>> S2;
     Eigen::SparseMatrix<std::complex<double>> H3;
     Eigen::SparseMatrix<std::complex<double>> H6;
+    Eigen::SparseMatrix<std::complex<double>> H7;
+    Eigen::SparseMatrix<std::complex<double>> H8;
 
+    Eigen::SparseMatrix<std::complex<double>> HSumStatic;//sum of H0,H2,H3,H6,H7,H8
 
+public:
     ///
     /// @param group group number
     /// @param row row number
@@ -102,8 +119,16 @@ public:
     /// @return signal from the python
     static std::string execPython(const char *cmd);
 
-    ///This function initializes the sparse matrices
+    ///This function initializes the sparse matrices H0,H2,H3,H6,H7,H8
     void populatedMatrices();
+
+    ///
+    /// @param j index of time
+    /// @return HDj
+    Eigen::SparseMatrix<std::complex<double>> HDj(const int &j);
+
+
+
 
 };
 

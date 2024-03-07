@@ -15,7 +15,9 @@
 #include <vector>
 #include <Eigen/Sparse>
 #include <unsupported/Eigen/KroneckerProduct>
+#include <boost/filesystem.hpp>
 
+namespace fs = boost::filesystem;
 using namespace std::complex_literals;
 const auto PI=std::numbers::pi;
 class DCE_Evolution {
@@ -64,6 +66,18 @@ public:
     void initPsi();
 
 
+    template<class T>
+    static void printVec(const std::vector <T> &vec) {
+        for (int i = 0; i < vec.size() - 1; i++) {
+            std::cout << vec[i] << ",";
+        }
+        std::cout << vec[vec.size() - 1] << std::endl;
+    }
+
+
+
+
+
 
 
 
@@ -84,18 +98,20 @@ public:
 
      static const int N1=4;//500;
      static const int N2=3;//2048;
-    double L1=5;
-    double L2=40;
+    double L1=0.1;//5;
+    double L2=0.6;//40;
 
     double dx1=2*L1/(static_cast<double>(N1));
     double dx2=2*L2/(static_cast<double >(N2));
     double dtEst=0.002;
     double tFlushStart=0;
-    double tFlushStop=5;
-    int flushNum=1;
-    double tTotPerFlush=tFlushStop-tFlushStart;
-    int M=static_cast<int>(std::ceil(tTotPerFlush/dtEst));
-    double dt=tTotPerFlush/(static_cast<double>(M) );
+    double tFlushStop=0.01;
+    int flushNum=3;
+    std::vector<int> jIndsAll;//index for time steps
+    double tTotPerFlush=0;
+    int stepsPerFlush=0;//total time steps
+    double dt=0;
+    std::vector<int> timeIndsAll;//all indices of time
 
 
     std::vector<double> x1ValsAll;
@@ -138,6 +154,16 @@ public:
     /// @return HDj
     Eigen::SparseMatrix<std::complex<double>> HDj(const int &j);
 
+    ///create output directories
+    void createOutDir();
+
+
+
+    ///initialize time indices and dt
+    void initTimeInds();
+
+    //evolution and write to file by flush
+    wvVec evolutionPerFlush(const int &fls, const wvVec& initVec);
 
 
 

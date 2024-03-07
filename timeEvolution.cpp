@@ -343,8 +343,70 @@ void DCE_Evolution::initPsi(){
 
             int pos=n1*N2+n2;
             double x1Tmp=this->x1ValsAll[n1];
+            double x2Tmp=this->x2ValsAll[n2];
+            double valTmp=std::exp(-0.5*omegac*std::pow(x1Tmp,2))
+                    *std::hermite(this->jH1,std::sqrt(omegac)*x1Tmp)
+                    *std::exp(-0.5*omegam*std::pow(x2Tmp,2))
+                    *std::hermite(this->jH2,std::sqrt(omegam)*x2Tmp);
+            Psi0[pos]=valTmp;
+
+
         }
     }
+    double nm0=Psi0.norm();
+    Psi0/=nm0;
+    this->PsiAll.push_back(Psi0);
+
+
+}
+
+
+///create output directories
+void DCE_Evolution::createOutDir(){
+    std::string outDir="./group"+std::to_string(this->groupNum)+"/row"+std::to_string(this->rowNum)+"/";
+
+    if(!fs::is_directory(outDir) || !fs::exists(outDir)){
+        fs::create_directories(outDir);
+    }
+
+
+
+}
+
+
+
+///initialize time indices and dt
+void DCE_Evolution::initTimeInds(){
+    this->tTotPerFlush=this->tFlushStop-this->tFlushStart;
+    this->stepsPerFlush=static_cast<int>(std::ceil(tTotPerFlush/dtEst));
+    this->dt=tTotPerFlush/static_cast<double >(stepsPerFlush);
+
+    for(int fls=0;fls<flushNum;fls++){
+        int startingInd=fls*stepsPerFlush;
+        for(int j=0;j<stepsPerFlush;j++){
+            this->timeIndsAll.push_back(startingInd+j);
+        }
+    }
+
+//std::vector<double> tAll;
+//    for (const auto&val:timeIndsAll){
+//        tAll.push_back(double (val)*dt);
+//    }
+//
+//    printVec(tAll);
+
+
+
+}
+
+
+
+//evolution and write to file by flush
+DCE_Evolution::wvVec DCE_Evolution::evolutionPerFlush(const int &fls, const DCE_Evolution::wvVec& initVec){
+
+    int startingInd=fls*this->stepsPerFlush;
+
+    int lastInd=startingInd+stepsPerFlush-1;
 
 
 

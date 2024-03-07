@@ -12,7 +12,7 @@ void DCE_Evolution::parseCSV(const int &group, const int &row) {
 std::string commandToReadCSV="python3 readCSV.py "+std::to_string(group)+" "+std::to_string(row);
 
 std::string result=this->execPython(commandToReadCSV.c_str());
-    std::cout<<result<<std::endl;
+//    std::cout<<result<<std::endl;
 
     std::regex pattern_j1H("j1H(\\d+)j2H");
     std::smatch  match_j1H;
@@ -59,7 +59,33 @@ std::string result=this->execPython(commandToReadCSV.c_str());
     }
 
     std::regex pattern_thetaCoef("thetaCoef([+-]?\\d+(\\.\\d+)?)");
-
+    std::smatch  match_thetaCoef;
+    if (std::regex_search(result,match_thetaCoef,pattern_thetaCoef)){
+        this->thetaCoef=std::stod(match_thetaCoef[1].str());
+    }
+//    std::cout<<"jH1="<<jH1<<std::endl;
+//
+//    std::cout<<"jH2="<<jH2<<std::endl;
+//
+//    std::cout<<"g0="<<g0<<std::endl;
+//
+//    std::cout<<"omegam="<<omegam<<std::endl;
+//
+//    std::cout<<"omegac="<<omegac<<std::endl;
+//
+//    std::cout<<"omegap="<<omegap<<std::endl;
+//
+//    std::cout<<"er="<<er<<std::endl;
+//
+//    std::cout<<"thetaCoef="<<thetaCoef<<std::endl;
+      double e2r=std::pow(er,2);
+      double eM2r=1/e2r;
+      this->Deltam=this->omegam-this->omegap;
+      this->lmd=(e2r-eM2r)/(e2r+eM2r)*Deltam;
+      this->theta=thetaCoef*PI;
+//      std::cout<<"lambda="<<lmd<<std::endl;
+//      std::cout<<"theta="<<theta<<std::endl;
+//      std::cout<<"Deltam="<<Deltam<<std::endl;
 
 
 
@@ -67,7 +93,7 @@ std::string result=this->execPython(commandToReadCSV.c_str());
 
 
 std::string DCE_Evolution::execPython(const char *cmd) {
-    std::array<char, 2048> buffer; // Buffer to store command output
+    std::array<char, 4096> buffer; // Buffer to store command output
     std::string result; // String to accumulate output
 
     // Open a pipe to read the output of the executed command
@@ -86,3 +112,225 @@ std::string DCE_Evolution::execPython(const char *cmd) {
 }
 
 
+
+///This function initializes the sparse matrices H0,H2,H3,H6,H7,H8
+void DCE_Evolution::populatedMatrices(){
+    //initialize identity matrix
+    this->IN1N2=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
+    for (int i=0;i<N1*N2;i++){
+        this->IN1N2.insert(i,i)=1.0;
+    }
+
+//    this->D2=Eigen::SparseMatrix<std::complex<double>>(N2,N2);
+//    for(int n2=0;n2<N2;n2++){
+//        D2.insert(n2,n2)=this->x2ValsAll[n2];
+//    }
+
+    //initialize H0
+    this->H0=(-0.5*omegac-0.5*Deltam)*this->IN1N2;
+
+    //initialize H2
+    this->H2=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
+    for(int n1=0;n1<N1;n1++) {
+
+        for (int n2 = 0; n2 < N2; n2++) {
+            this->H2.insert(n1 * N2 + n2, n1 * N2 + n2) = std::pow(this->x1ValsAll[n1], 2);
+
+        }
+    }
+    H2*=0.5*std::pow(omegac,2);
+
+    //initialize H3
+    this->H3=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
+
+    std::vector<std::complex<double>> S2Diag;
+    for (int n2=0;n2<N2;n2++){
+        S2Diag.push_back(std::pow(this->x2ValsAll[n2],2));
+    }
+
+    for(int n1=0;n1<N1;n1++){
+        for(int n2=0;n2<N2;n2++){
+
+            this->H3.insert(n1*N2+n2,n1*N2+n2)=S2Diag[n2];
+        }
+
+    }
+    H3*=(0.5*lmd*std::cos(theta)+0.5*Deltam*omegam);
+
+    //initialize H6
+    this->H6=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
+    //fill in diagonal values
+    for (int i=0;i<N1*N2;i++){
+        this->H6.insert(i,i)=-2.0;
+    }
+    //fill in super-block-diagonal
+    Eigen::SparseMatrix<std::complex<double>> H6Upper(N1*N2,N1*N2);
+    for (int i=0;i<(N1-1)*N2;i++){
+        H6Upper.insert(i,i+N2)=1.0;
+    }
+    Eigen::SparseMatrix<std::complex<double>> H6Lower=H6Upper.transpose();
+    H6+=H6Upper;
+    H6+=H6Lower;
+//    std::cout<<"H6 block="<<H6<<std::endl;
+    H6*=-1.0/(std::pow(dx1,2));
+//        std::cout<<"H6 block="<<H6<<std::endl;
+
+    // initialize H7
+    this->H7=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
+    for(int n1=0;n1<N1;n1++){
+        int startingRowPos=n1*N2;
+        int startingColPos=n1*N2;
+        //construct each Q2 matrix
+
+        //diagonal
+        for(int n2=0;n2<N2;n2++){
+            H7.insert(startingRowPos+n2,startingColPos+n2)=-2.0;
+        }
+
+        //upper superdiagonal
+        for(int n2=0;n2<N2-1;n2++){
+            H7.insert(startingRowPos+n2,startingColPos+n2+1)=1.0;
+        }
+        //lower subdiagonal
+        for(int n2=1;n2<N2;n2++){
+            H7.insert(startingRowPos+n2,startingColPos+n2-1)=1.0;
+        }
+    }
+    H7*=(-Deltam/(2*omegam)+lmd*std::cos(theta)/(2*omegam))/(std::pow(dx2,2));
+
+    //initialze H8
+    this->H8=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
+    std::vector<double> upperDiagVals;
+    for(int n2=0;n2<N2-1;n2++){
+        upperDiagVals.push_back(x2ValsAll[n2]+x2ValsAll[n2+1]);
+    }
+
+    for(int n1=0;n1<N1;n1++) {
+        int startingRowPos = n1 * N2;
+        int startingColPos = n1 * N2;
+        //upper superdiagonal
+        for(int n2=0;n2<N2-1;n2++){
+            H8.insert(startingRowPos+n2,startingColPos+n2+1)=upperDiagVals[n2];
+            H8.insert(startingRowPos+n2+1,startingColPos+n2)=-upperDiagVals[n2];
+        }
+
+    }
+    H8*=1i*lmd*std::sin(theta)/(4*dx2);
+
+    this->HSumStatic=H0+H2+H3+H6+H7+H8;
+
+
+}//end of populate matrices
+
+
+
+///
+/// @param j index of time
+/// @return H1j
+Eigen::SparseMatrix<std::complex<double>> DCE_Evolution::H1Val(const int & j){
+
+    Eigen::SparseMatrix<std::complex<double>> retMat=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
+    //fill in diagonal
+    for (int i=0;i<N1*N2;i++){
+        int n2=i%N2;
+        retMat.insert(i,i)=x2ValsAll[n2];
+    }
+
+//    std::cout<<retMat<<std::endl;
+
+    double tj=static_cast<double >(j)*dt;
+
+    retMat*=-0.5*g0*std::sqrt(2.0*omegam)*std::cos(omegap*(tj+0.5*dt));
+
+    return retMat;
+
+
+
+}
+
+
+
+
+///
+/// @param j j index of time
+/// @return H4j
+Eigen::SparseMatrix<std::complex<double>> DCE_Evolution::H4Val(const int & j){
+    Eigen::SparseMatrix<std::complex<double>> retMat=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
+
+    for(int n1=0;n1<N1;n1++){
+        int startingPos=n1*N2;
+        double x1Tmp=x1ValsAll[n1];
+        double x1Tmp2=std::pow(x1Tmp,2);
+        for(int n2=0;n2<N2;n2++){
+            retMat.insert(startingPos+n2,startingPos+n2)=x1Tmp2*x2ValsAll[n2];
+        }
+    }
+    double tj=static_cast<double >(j)*dt;
+
+    retMat*=g0*omegac*std::sqrt(2.0*omegam)*std::cos(omegap*(tj+0.5*dt));
+
+    return retMat;
+
+
+
+}
+
+
+
+///
+/// @param j index of time
+/// @return H5j
+Eigen::SparseMatrix<std::complex<double>>DCE_Evolution::H5Val(const int& j){
+    //construct A5j
+    Eigen::SparseMatrix<std::complex<double>> A5jPart0=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
+    Eigen::SparseMatrix<std::complex<double>> A5jPart1=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
+
+    for(int n1=0;n1<N1;n1++){
+        int startingPos=n1*N2;
+        double x1Tmp=x1ValsAll[n1];
+        double x1Tmp2=std::pow(x1Tmp,2);
+        for(int n2=0;n2<N2;n2++){
+            A5jPart0.insert(startingPos+n2,startingPos+n2)=x1Tmp2;
+
+        }
+    }
+    double tj=static_cast<double >(j)*dt;
+
+    A5jPart0*=-1i*g0*omegac*std::sqrt(2.0/omegam)*std::sin(omegap*(tj+0.5*dt));
+
+    for(int i=0;i<N1*N2;i++){
+        A5jPart1.insert(i,i)=1.0;
+
+    }
+    A5jPart1*=1j*0.5*g0*std::sqrt(2.0/omegam)*std::sin(omegap*(tj+0.5*dt));
+
+    Eigen::SparseMatrix<std::complex<double>> A5j=A5jPart0+A5jPart1;
+
+
+    //construct diag P2
+    Eigen::SparseMatrix<std::complex<double>> diagPart=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
+
+    for (int n1=0;n1<N1;n1++){
+        int startingPos=n1*N2;
+        for(int n2=0;n2<N2-1;n2++){
+            diagPart.insert(startingPos+n2,startingPos+n2+1)=1.0;
+            diagPart.insert(startingPos+n2+1,startingPos+n2)=-1.0;
+        }
+    }
+
+
+    Eigen::SparseMatrix<std::complex<double>> retMat=A5j*diagPart/(2*dx2);
+
+    return retMat;
+}
+
+
+///
+/// @param j index of time
+/// @return HDj
+Eigen::SparseMatrix<std::complex<double>> DCE_Evolution::HDj(const int &j){
+
+    return HSumStatic+ H1Val(j)+ H4Val(j)+ H5Val(j);
+
+
+}

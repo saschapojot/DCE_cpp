@@ -334,3 +334,18 @@ Eigen::SparseMatrix<std::complex<double>> DCE_Evolution::HDj(const int &j){
 
 
 }
+
+///initialize wavefunction
+void DCE_Evolution::initPsi(){
+    wvVec Psi0;
+    for(int n1=0;n1<N1;n1++){
+        for(int n2=0;n2<N2;n2++){
+
+            int pos=n1*N2+n2;
+            double x1Tmp=this->x1ValsAll[n1];
+        }
+    }
+
+
+
+}

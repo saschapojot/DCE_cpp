@@ -60,6 +60,13 @@ public:
     /// @return H5j
     Eigen::SparseMatrix<std::complex<double>>H5Val(const int& j);
 
+    ///initialize wavefunction
+    void initPsi();
+
+
+
+
+
 public:
     int jH1 = -1;
     int jH2 = -1;
@@ -75,8 +82,8 @@ public:
     double lmd=0;
     double Deltam=0;
 
-     const int N1=4;//500;
-     const int N2=3;//2048;
+     static const int N1=4;//500;
+     static const int N2=3;//2048;
     double L1=5;
     double L2=40;
 
@@ -106,6 +113,10 @@ public:
     Eigen::SparseMatrix<std::complex<double>> H8;
 
     Eigen::SparseMatrix<std::complex<double>> HSumStatic;//sum of H0,H2,H3,H6,H7,H8
+    using wvVec=Eigen::Vector<std::complex<double>,N1*N2>;
+    std::vector<wvVec> PsiAll;
+
+
 
 public:
     ///

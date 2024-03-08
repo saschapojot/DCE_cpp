@@ -11,10 +11,7 @@ int main(int argc, char *argv[]){
     evo.createOutDir();
     evo.initTimeInds();
 
-    int j=0;
-    DCE_Evolution::wvVec psi1=evo.oneStepEvolution(j,evo.Psi0);
-    std::cout<<psi1<<std::endl;
-
+    evo.evolution();
 
 
 

@@ -409,9 +409,31 @@ DCE_Evolution::wvVec DCE_Evolution::evolutionPerFlush(const int &fls, const DCE_
 
     int startingInd=fls*this->stepsPerFlush;
 
-    int lastInd=startingInd+stepsPerFlush-1;
+    int nextStartingInd=startingInd+stepsPerFlush;
 
-    return wvVec();
+    std::vector<wvVec> PsiPerFlush;
+    PsiPerFlush.push_back(initVec);
+    wvVec PsiCurr=initVec;
+    for(int j=startingInd;j<nextStartingInd;j++){
+        wvVec PsiNext= oneStepEvolution(j,PsiCurr);
+        PsiPerFlush.push_back(PsiNext);
+        PsiCurr=PsiNext;
+
+    }
+
+
+    std::vector<std::vector<std::complex<double>>> outData=this->eigen2cppType(PsiPerFlush);
+
+
+    std::string outFile=this->outDir+"flush"+std::to_string(fls)+"N1"+std::to_string(N1)
+            +"N2"+std::to_string(N2)+"L1"+std::to_string(L1)
+            +"L2"+std::to_string(L2)+"solution.bin";
+    std::ofstream ofs(outFile,std::ios::binary);
+    msgpack::pack(ofs,outData);
+    ofs.close();
+
+    int length=PsiPerFlush.size();
+    return PsiPerFlush[length-1];
 
 }
 
@@ -444,5 +466,38 @@ DCE_Evolution::wvVec DCE_Evolution::oneStepEvolution(const int& j, const DCE_Evo
     wvVec PsiNext=mat1Tmp*y;
     return PsiNext;
 
+
+}
+
+
+///
+/// @param solutions solutions per flush
+/// @return converted to cpp data type
+std::vector<std::vector<std::complex<double>>> DCE_Evolution::eigen2cppType(const std::vector<DCE_Evolution::wvVec > & solutions){
+
+    std::vector<std::vector<std::complex<double>>> retData;
+    for(const auto& eigenTypeVec:solutions){
+        std::vector<std::complex<double>> oneVec;
+        for(int i=0;i<eigenTypeVec.size();i++){
+            oneVec.push_back(eigenTypeVec(i));
+        }
+        retData.push_back(oneVec);
+    }
+
+    return retData;
+
+
+}
+
+
+///evolution
+void DCE_Evolution::evolution(){
+    wvVec PsiInit=this->Psi0;
+    for(int fls=0;fls<this->flushNum;fls++){
+        wvVec PsiFinal=this->evolutionPerFlush(fls,PsiInit);
+        PsiInit=PsiFinal;
+
+
+    }
 
 }

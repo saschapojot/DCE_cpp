@@ -256,7 +256,7 @@ class solution:
 wavefunctions=solution()
 wavefunctions.psiAll[0,:]=Psi0
 # PsiAll=[copy.deepcopy(Psi0)]
-for j in range(0,1):
+for j in range(0,4):
 
     if j%500==0:
         t500Multiple=datetime.now()
@@ -269,7 +269,7 @@ for j in range(0,1):
     # PsiAll.append(PsiNext)
     wavefunctions.psiAll[j+1,:]=PsiNext
 
-print(wavefunctions.psiAll[1,:])
+print(wavefunctions.psiAll[3,:])
 # outData=np.array(PsiAll).T
 # dtFrm=pd.DataFrame(data=outData)
 # outDirPrefix="./omegac"+str(omegac)+"omegam"+str(omegam)+"omegap"+str(omegap)+"er"+str(er)+"theta"+str(theta/np.pi)+"pi"+"/"

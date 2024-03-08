@@ -16,6 +16,9 @@
 #include <Eigen/Sparse>
 #include <unsupported/Eigen/KroneckerProduct>
 #include <boost/filesystem.hpp>
+#include <memory>
+#include <msgpack.hpp>
+#include <fstream>
 
 namespace fs = boost::filesystem;
 using namespace std::complex_literals;
@@ -96,16 +99,16 @@ public:
     double lmd=0;
     double Deltam=0;
 
-     static const int N1=4;//500;
-     static const int N2=3;//2048;
-    double L1=0.1;//5;
-    double L2=0.6;//40;
+     static const int N1=500;
+     static const int N2=4096;
+    double L1=5;
+    double L2=80;
 
     double dx1=2*L1/(static_cast<double>(N1));
     double dx2=2*L2/(static_cast<double >(N2));
     double dtEst=0.002;
     double tFlushStart=0;
-    double tFlushStop=0.01;
+    double tFlushStop=2;
     int flushNum=3;
     std::vector<int> jIndsAll;//index for time steps
     double tTotPerFlush=0;
@@ -172,9 +175,48 @@ public:
     //evolution and write to file by flush
     wvVec evolutionPerFlush(const int &fls, const wvVec& initVec);
 
+    ///evolution
+    void evolution();
+
+    ///
+    /// @param solutions solutions per flush
+    /// @return converted to cpp data type
+    std::vector<std::vector<std::complex<double>>> eigen2cppType(const std::vector<wvVec > & solutions);
+
 
 
 };
+namespace msgpack {
+    MSGPACK_API_VERSION_NAMESPACE(MSGPACK_DEFAULT_API_NS) {
+        namespace adaptor {
+
+            template<>
+            struct convert<std::complex<double>> {
+                msgpack::object const& operator()(msgpack::object const& o, std::complex<double>& v) const {
+                    if(o.type != msgpack::type::ARRAY || o.via.array.size != 2) {
+                        throw msgpack::type_error();
+                    }
+                    v.real(o.via.array.ptr[0].as<double>());
+                    v.imag(o.via.array.ptr[1].as<double>());
+                    return o;
+                }
+            };
+
+            template<>
+            struct pack<std::complex<double>> {
+                template <typename Stream>
+                msgpack::packer<Stream>& operator()(msgpack::packer<Stream>& o, std::complex<double> const& v) const {
+                    // The complex number is packed as an array of two doubles.
+                    o.pack_array(2);
+                    o.pack(v.real());
+                    o.pack(v.imag());
+                    return o;
+                }
+            };
+
+        } // namespace adaptor
+    } // MSGPACK_API_VERSION_NAMESPACE(MSGPACK_DEFAULT_API_NS)
+} // namespace msgpack
 
 
 #endif //DCE_CPP_TIMEEVOLUTION_HPP

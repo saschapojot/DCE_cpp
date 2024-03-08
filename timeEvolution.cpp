@@ -155,7 +155,7 @@ void DCE_Evolution::populatedMatrices(){
         }
 
     }
-    H3*=(0.5*lmd*std::cos(theta)+0.5*Deltam*omegam);
+    H3*=(0.5*lmd*omegam*std::cos(theta)+0.5*Deltam*omegam);
 
     //initialize H6
     this->H6=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
@@ -172,7 +172,7 @@ void DCE_Evolution::populatedMatrices(){
     H6+=H6Upper;
     H6+=H6Lower;
 //    std::cout<<"H6 block="<<H6<<std::endl;
-    H6*=-1.0/(std::pow(dx1,2));
+    H6*=-1.0/(2.0*std::pow(dx1,2));
 //        std::cout<<"H6 block="<<H6<<std::endl;
 
     // initialize H7
@@ -218,6 +218,8 @@ void DCE_Evolution::populatedMatrices(){
     H8*=1i*lmd*std::sin(theta)/(4*dx2);
 
     this->HSumStatic=H0+H2+H3+H6+H7+H8;
+
+//    std::cout<<"HS="<<HSumStatic<<std::endl;
 
 
 }//end of populate matrices
@@ -330,6 +332,7 @@ Eigen::SparseMatrix<std::complex<double>>DCE_Evolution::H5Val(const int& j){
 /// @return HDj
 Eigen::SparseMatrix<std::complex<double>> DCE_Evolution::HDj(const int &j){
 
+
     return HSumStatic+ H1Val(j)+ H4Val(j)+ H5Val(j);
 
 
@@ -337,7 +340,7 @@ Eigen::SparseMatrix<std::complex<double>> DCE_Evolution::HDj(const int &j){
 
 ///initialize wavefunction
 void DCE_Evolution::initPsi(){
-    wvVec Psi0;
+    this->Psi0=wvVec();
     for(int n1=0;n1<N1;n1++){
         for(int n2=0;n2<N2;n2++){
 
@@ -348,14 +351,14 @@ void DCE_Evolution::initPsi(){
                     *std::hermite(this->jH1,std::sqrt(omegac)*x1Tmp)
                     *std::exp(-0.5*omegam*std::pow(x2Tmp,2))
                     *std::hermite(this->jH2,std::sqrt(omegam)*x2Tmp);
-            Psi0[pos]=valTmp;
+            this->Psi0[pos]=valTmp;
 
 
         }
     }
     double nm0=Psi0.norm();
     Psi0/=nm0;
-    this->PsiAll.push_back(Psi0);
+
 
 
 }
@@ -363,7 +366,7 @@ void DCE_Evolution::initPsi(){
 
 ///create output directories
 void DCE_Evolution::createOutDir(){
-    std::string outDir="./group"+std::to_string(this->groupNum)+"/row"+std::to_string(this->rowNum)+"/";
+    this->outDir="./group"+std::to_string(this->groupNum)+"/row"+std::to_string(this->rowNum)+"/";
 
     if(!fs::is_directory(outDir) || !fs::exists(outDir)){
         fs::create_directories(outDir);
@@ -408,6 +411,38 @@ DCE_Evolution::wvVec DCE_Evolution::evolutionPerFlush(const int &fls, const DCE_
 
     int lastInd=startingInd+stepsPerFlush-1;
 
+    return wvVec();
+
+}
+
+
+
+///
+/// @param j time step
+/// @param PsiCurr wavefunction before evolution
+/// @return wavefunction after evolution
+DCE_Evolution::wvVec DCE_Evolution::oneStepEvolution(const int& j, const DCE_Evolution::wvVec& PsiCurr){
+
+
+    Eigen::SparseMatrix<std::complex<double>> HDjMat= HDj(j);
+
+    Eigen::SparseMatrix<std::complex<double>> mat0Tmp=0.5*1i*dt*HDjMat;
+    //add scalar 1 to matTmp, i.e., add identity matrix to matTmp
+    for(int i=0;i<N1*N2;i++){
+        mat0Tmp.coeffRef(i,i)+=1.0;
+    }
+
+    Eigen::BiCGSTAB<Eigen::SparseMatrix<std::complex<double>>> solver;
+    solver.compute(mat0Tmp);
+    wvVec y=solver.solve(PsiCurr);
+
+    Eigen::SparseMatrix<std::complex<double>> mat1Tmp=-0.5*1i*dt*HDjMat;
+    for(int i=0;i<N1*N2;i++){
+        mat1Tmp.coeffRef(i,i)+=1.0;
+    }
+
+    wvVec PsiNext=mat1Tmp*y;
+    return PsiNext;
 
 
 }

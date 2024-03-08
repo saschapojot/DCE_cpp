@@ -205,7 +205,7 @@ for item in ret0:
     Psi0[n1*N2+n2]=val
 Psi0/=np.linalg.norm(Psi0,ord=2)
 tInitEnd=datetime.now()
-print("Psi0="+str(Psi0))
+
 print("Initialization of Psi: ",tInitEnd-tInitStart)
 
 
@@ -229,6 +229,7 @@ def HMat(j):
     """
     HDRj = H0 + H1Mat(j) + H2 + H3 + H4Mat(j) + H5Mat(j) + H6 + H7 + H8
     return [j,HDRj]
+
 
 
 tStepsAll=[j for j in range(0,M)]

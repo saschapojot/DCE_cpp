@@ -113,6 +113,7 @@ public:
     double dt=0;
     std::vector<int> timeIndsAll;//all indices of time
 
+    std::string outDir;
 
     std::vector<double> x1ValsAll;
     std::vector<double> x2ValsAll;
@@ -130,8 +131,8 @@ public:
 
     Eigen::SparseMatrix<std::complex<double>> HSumStatic;//sum of H0,H2,H3,H6,H7,H8
     using wvVec=Eigen::Vector<std::complex<double>,N1*N2>;
-    std::vector<wvVec> PsiAll;
-
+//    std::vector<wvVec> PsiAll;
+    wvVec Psi0;
 
 
 public:
@@ -161,6 +162,12 @@ public:
 
     ///initialize time indices and dt
     void initTimeInds();
+
+    ///
+    /// @param j time step
+    /// @param PsiCurr wavefunction before evolution
+    /// @return wavefunction after evolution
+    wvVec oneStepEvolution(const int& j, const wvVec& PsiCurr);
 
     //evolution and write to file by flush
     wvVec evolutionPerFlush(const int &fls, const wvVec& initVec);

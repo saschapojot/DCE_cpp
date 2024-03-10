@@ -499,6 +499,7 @@ void DCE_Evolution::evolution(){
     for(int fls=0;fls<this->flushNum;fls++){
         wvVec PsiFinal=this->evolutionPerFlush(fls,PsiInit);
         PsiInit=PsiFinal;
+        std::cout<<"flush "<<fls<<std::endl;
 
 
     }

@@ -369,7 +369,7 @@ void DCE_Evolution::initPsi(){
 
 ///create output directories
 void DCE_Evolution::createOutDir(){
-    this->outDir="./group"+std::to_string(this->groupNum)+"/row"+std::to_string(this->rowNum)+"/";
+    this->outDir="./groupNew"+std::to_string(this->groupNum)+"/row"+std::to_string(this->rowNum)+"/";
 
     if(!fs::is_directory(outDir) || !fs::exists(outDir)){
         fs::create_directories(outDir);

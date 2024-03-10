@@ -23,6 +23,9 @@
 namespace fs = boost::filesystem;
 using namespace std::complex_literals;
 const auto PI=std::numbers::pi;
+
+using wvVec=Eigen::VectorXcd;
+
 class DCE_Evolution {
 public:
     /// This constructor initializes all parameters
@@ -99,7 +102,7 @@ public:
     double lmd=0;
     double Deltam=0;
 
-     static const int N1=500;
+     static const int N1=2500;
      static const int N2=4096;
     double L1=5;
     double L2=80;
@@ -109,7 +112,7 @@ public:
     double dtEst=0.002;
     double tFlushStart=0;
     double tFlushStop=2;
-    int flushNum=3;
+    int flushNum=6;
     std::vector<int> jIndsAll;//index for time steps
     double tTotPerFlush=0;
     int stepsPerFlush=0;//total time steps
@@ -133,8 +136,8 @@ public:
     Eigen::SparseMatrix<std::complex<double>> H8;
 
     Eigen::SparseMatrix<std::complex<double>> HSumStatic;//sum of H0,H2,H3,H6,H7,H8
-    using wvVec=Eigen::Vector<std::complex<double>,N1*N2>;
-//    std::vector<wvVec> PsiAll;
+//    using wvVec=Eigen::Vector<std::complex<double>,N1*N2>;
+    std::vector<wvVec> PsiAll;
     wvVec Psi0;
 
 

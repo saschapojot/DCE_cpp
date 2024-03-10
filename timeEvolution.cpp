@@ -340,7 +340,7 @@ Eigen::SparseMatrix<std::complex<double>> DCE_Evolution::HDj(const int &j){
 
 ///initialize wavefunction
 void DCE_Evolution::initPsi(){
-    this->Psi0=wvVec();
+    this->Psi0=wvVec::Zero(N1*N2);
     for(int n1=0;n1<N1;n1++){
         for(int n2=0;n2<N2;n2++){
 
@@ -352,12 +352,15 @@ void DCE_Evolution::initPsi(){
                     *std::exp(-0.5*omegam*std::pow(x2Tmp,2))
                     *std::hermite(this->jH2,std::sqrt(omegam)*x2Tmp);
             this->Psi0[pos]=valTmp;
+            std::cout<<"valTmp="<<valTmp<<std::endl;
 
 
         }
     }
     double nm0=Psi0.norm();
     Psi0/=nm0;
+
+    std::cout<<"Psi0="<<Psi0<<std::endl;
 
 
 
@@ -405,7 +408,7 @@ void DCE_Evolution::initTimeInds(){
 
 
 //evolution and write to file by flush
-DCE_Evolution::wvVec DCE_Evolution::evolutionPerFlush(const int &fls, const DCE_Evolution::wvVec& initVec){
+wvVec DCE_Evolution::evolutionPerFlush(const int &fls, const wvVec& initVec){
 
     int startingInd=fls*this->stepsPerFlush;
 
@@ -443,7 +446,7 @@ DCE_Evolution::wvVec DCE_Evolution::evolutionPerFlush(const int &fls, const DCE_
 /// @param j time step
 /// @param PsiCurr wavefunction before evolution
 /// @return wavefunction after evolution
-DCE_Evolution::wvVec DCE_Evolution::oneStepEvolution(const int& j, const DCE_Evolution::wvVec& PsiCurr){
+wvVec DCE_Evolution::oneStepEvolution(const int& j, const wvVec& PsiCurr){
 
 
     Eigen::SparseMatrix<std::complex<double>> HDjMat= HDj(j);
@@ -473,7 +476,7 @@ DCE_Evolution::wvVec DCE_Evolution::oneStepEvolution(const int& j, const DCE_Evo
 ///
 /// @param solutions solutions per flush
 /// @return converted to cpp data type
-std::vector<std::vector<std::complex<double>>> DCE_Evolution::eigen2cppType(const std::vector<DCE_Evolution::wvVec > & solutions){
+std::vector<std::vector<std::complex<double>>> DCE_Evolution::eigen2cppType(const std::vector<wvVec > & solutions){
 
     std::vector<std::vector<std::complex<double>>> retData;
     for(const auto& eigenTypeVec:solutions){

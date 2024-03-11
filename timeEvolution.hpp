@@ -113,7 +113,7 @@ public:
     double dx2=2*L2/(static_cast<double >(N2));
     double dtEst=0.002;
     double tFlushStart=0;
-    double tFlushStop=0.01;
+    double tFlushStop=1;
     int flushNum=3;
     std::vector<int> jIndsAll;//index for time steps
     double tTotPerFlush=0;

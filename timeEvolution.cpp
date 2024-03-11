@@ -352,7 +352,7 @@ void DCE_Evolution::initPsi(){
                     *std::exp(-0.5*omegam*std::pow(x2Tmp,2))
                     *std::hermite(this->jH2,std::sqrt(omegam)*x2Tmp);
             this->Psi0[pos]=valTmp;
-            std::cout<<"valTmp="<<valTmp<<std::endl;
+//            std::cout<<"valTmp="<<valTmp<<std::endl;
 
 
         }
@@ -360,7 +360,7 @@ void DCE_Evolution::initPsi(){
     double nm0=Psi0.norm();
     Psi0/=nm0;
 
-    std::cout<<"Psi0="<<Psi0<<std::endl;
+//    std::cout<<"Psi0="<<Psi0<<std::endl;
 
 
 

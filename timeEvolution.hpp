@@ -102,7 +102,7 @@ public:
     double lmd=0;
     double Deltam=0;
 
-     static const int N1=2500;
+     static const int N1=500;
      static const int N2=4096;
     double L1=5;
     double L2=80;

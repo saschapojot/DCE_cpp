@@ -102,10 +102,12 @@ public:
     double lmd=0;
     double Deltam=0;
 
-     static const int N1=4;//500;
-     static const int N2=3;//4096;
-    double L1=0.1;//5;
-    double L2=0.6;//80;
+
+     static const int N1=500;
+     static const int N2=4096;
+    double L1=5;
+    double L2=80;
+
 
     double dx1=2*L1/(static_cast<double>(N1));
     double dx2=2*L2/(static_cast<double >(N2));

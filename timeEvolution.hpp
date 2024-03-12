@@ -103,10 +103,10 @@ public:
     double Deltam=0;
 
 
-     static const int N1=500;
-     static const int N2=2048;
-    double L1=5;
-    double L2=40;
+     static const int N1=3;//500;
+     static const int N2=4;//2048;
+    double L1=0.1;//5;
+    double L2=0.3;//40;
 
 
     double dx1=2*L1/(static_cast<double>(N1));

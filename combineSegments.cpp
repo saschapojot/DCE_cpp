@@ -413,3 +413,76 @@ std::vector<double> combineSegments::photonAll(){
 
 }
 
+
+
+///
+/// @return phonon numbers at each time
+std::vector<double> combineSegments::phononAll(){
+    std::vector<std::future<double>> futures;
+    for(const auto&vec:this->solutions){
+        std::future<double> fut=std::async(std::launch::async,&combineSegments::numOfPhonon,this,vec);
+        futures.push_back(std::move(fut));
+    }
+
+
+    std::vector<double>retVec;
+    for(auto& fut:futures){
+        retVec.push_back(fut.get());
+    }
+    return retVec;
+
+
+
+}
+
+
+
+/// write to csv
+/// @param photonNumAll all photon numbers
+/// @param phononNumAll all phonon numbers
+void combineSegments::to_json(const std::vector<double> &photonNumAll,const std::vector<double> &phononNumAll){
+
+    std::string suffix="N1"+std::to_string(N1)+"N2"+std::to_string(N2)+"L1"+std::to_string(L1)+"L2"+std::to_string(L2);
+std::string outPhotonFileName=this->outDir+"photon"+suffix+".json";
+
+std::string outPhononFileName=this->outDir+"phonon"+suffix+".json";
+
+boost::json::object objPhoton;
+boost::json::array arrPhoton;
+for(const auto &val:photonNumAll){
+    arrPhoton.push_back(val);
+}
+
+    boost::json::array timeAll;
+for(int i=0;i<photonNumAll.size();i++){
+    double ti=static_cast<double >(i)*dt;
+    timeAll.push_back(ti);
+}
+
+
+
+objPhoton["photonNum"]=arrPhoton;
+objPhoton["time"]=timeAll;
+
+
+    boost::json::object objPhonon;
+    boost::json::array arrPhonon;
+    for(const auto&val:phononNumAll){
+        arrPhonon.push_back(val);
+    }
+
+    objPhonon["phononNum"]=arrPhonon;
+    objPhonon["time"]=timeAll;
+
+    std::ofstream ofsPhoton(outPhotonFileName);
+    std::string photon_str=boost::json::serialize(objPhoton);
+    ofsPhoton<<photon_str<<std::endl;
+    ofsPhoton.close();
+
+
+    std::ofstream  ofsPhonon(outPhononFileName);
+    std::string phonon_str=boost::json::serialize(objPhonon);
+    ofsPhonon<<phonon_str<<std::endl;
+    ofsPhonon.close();
+
+}

@@ -14,7 +14,7 @@
 #include <fstream>
 #include <msgpack.hpp>
 #include <Eigen/Sparse>
-
+#include <boost/json.hpp>
 #include <future>
 
 
@@ -172,6 +172,11 @@ public:
     ///
     /// @return phonon numbers at each time
     std::vector<double> phononAll();
+
+    /// write to json
+    /// @param photonNumAll all photon numbers
+    /// @param phononNumAll all phonon numbers
+    void to_json(const std::vector<double> &photonNumAll,const std::vector<double> &phononNumAll);
 
 };
 

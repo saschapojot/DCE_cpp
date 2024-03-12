@@ -104,9 +104,9 @@ public:
 
 
      static const int N1=500;
-     static const int N2=4096;
+     static const int N2=2048;
     double L1=5;
-    double L2=80;
+    double L2=40;
 
 
     double dx1=2*L1/(static_cast<double>(N1));

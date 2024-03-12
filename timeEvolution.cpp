@@ -421,6 +421,9 @@ wvVec DCE_Evolution::evolutionPerFlush(const int &fls, const wvVec& initVec){
         wvVec PsiNext= oneStepEvolution(j,PsiCurr);
         PsiPerFlush.push_back(PsiNext);
         PsiCurr=PsiNext;
+        if(j%100==0){
+            std::cout<<"loop "<<j<<std::endl;
+        }
 
     }
 

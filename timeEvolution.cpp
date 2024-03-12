@@ -413,7 +413,7 @@ wvVec DCE_Evolution::evolutionPerFlush(const int &fls, const wvVec& initVec){
     int startingInd=fls*this->stepsPerFlush;
 
     int nextStartingInd=startingInd+stepsPerFlush;
-
+    const auto tStart{std::chrono::steady_clock::now()};
     std::vector<wvVec> PsiPerFlush;
     PsiPerFlush.push_back(initVec);
     wvVec PsiCurr=initVec;
@@ -421,8 +421,11 @@ wvVec DCE_Evolution::evolutionPerFlush(const int &fls, const wvVec& initVec){
         wvVec PsiNext= oneStepEvolution(j,PsiCurr);
         PsiPerFlush.push_back(PsiNext);
         PsiCurr=PsiNext;
-        if(j%100==0){
+        if(j%10==0){
             std::cout<<"loop "<<j<<std::endl;
+            const auto tEnd{std::chrono::steady_clock::now()};
+            const std::chrono::duration<double> elapsed_secondsAll{tEnd - tStart};
+            std::cout<<"10-loop time: "<< elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
         }
 
     }

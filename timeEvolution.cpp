@@ -454,9 +454,14 @@ wvVec DCE_Evolution::evolutionPerFlush(const int &fls, const wvVec& initVec){
 /// @return wavefunction after evolution
 wvVec DCE_Evolution::oneStepEvolution(const int& j, const wvVec& PsiCurr){
 
-
+    const auto tInitHStart{std::chrono::steady_clock::now()};
     Eigen::SparseMatrix<std::complex<double>> HDjMat= HDj(j);
+    const auto tInitHEnd{std::chrono::steady_clock::now()};
+    const std::chrono::duration<double> elapsed_secondsAll{tInitHEnd - tInitHStart};
+    std::cout<<"init H: "<< elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
 
+
+    const auto tSolve_yStart{std::chrono::steady_clock::now()};
     Eigen::SparseMatrix<std::complex<double>> mat0Tmp=0.5*1i*dt*HDjMat;
     //add scalar 1 to matTmp, i.e., add identity matrix to matTmp
     for(int i=0;i<N1*N2;i++){
@@ -466,13 +471,20 @@ wvVec DCE_Evolution::oneStepEvolution(const int& j, const wvVec& PsiCurr){
     Eigen::BiCGSTAB<Eigen::SparseMatrix<std::complex<double>>> solver;
     solver.compute(mat0Tmp);
     wvVec y=solver.solve(PsiCurr);
+    const auto tSolve_yEnd{std::chrono::steady_clock::now()};
+    const std::chrono::duration<double> elapsed_Solve_y{tSolve_yEnd- tSolve_yStart};
+    std::cout<<"solve y: "<< elapsed_Solve_y.count() / 3600.0 << " h" << std::endl;
 
+    const auto tProdStart{std::chrono::steady_clock::now()};
     Eigen::SparseMatrix<std::complex<double>> mat1Tmp=-0.5*1i*dt*HDjMat;
     for(int i=0;i<N1*N2;i++){
         mat1Tmp.coeffRef(i,i)+=1.0;
     }
 
     wvVec PsiNext=mat1Tmp*y;
+    const auto tProdEnd{std::chrono::steady_clock::now()};
+    const std::chrono::duration<double> elapsedProd{tProdEnd- tProdStart};
+    std::cout<<"prod: "<< elapsedProd.count() / 3600.0 << " h" << std::endl;
     return PsiNext;
 
 

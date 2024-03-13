@@ -103,17 +103,17 @@ public:
     double Deltam=0;
 
 
-     static const int N1=3;//500;
-     static const int N2=4;//2048;
-    double L1=0.1;//5;
-    double L2=0.3;//40;
+     static const int N1=500;
+     static const int N2=1024;
+    double L1=5;
+    double L2=20;
 
 
     double dx1=2*L1/(static_cast<double>(N1));
     double dx2=2*L2/(static_cast<double >(N2));
     double dtEst=0.002;
     double tFlushStart=0;
-    double tFlushStop=1;
+    double tFlushStop=0.01;
     int flushNum=3;
     std::vector<int> jIndsAll;//index for time steps
     double tTotPerFlush=0;

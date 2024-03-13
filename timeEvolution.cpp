@@ -421,11 +421,11 @@ wvVec DCE_Evolution::evolutionPerFlush(const int &fls, const wvVec& initVec){
         wvVec PsiNext= oneStepEvolution(j,PsiCurr);
         PsiPerFlush.push_back(PsiNext);
         PsiCurr=PsiNext;
-        if(j%10==0){
+        if(j%2==0){
             std::cout<<"loop "<<j<<std::endl;
             const auto tEnd{std::chrono::steady_clock::now()};
             const std::chrono::duration<double> elapsed_secondsAll{tEnd - tStart};
-            std::cout<<"10-loop time: "<< elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
+            std::cout<<"2-loop time: "<< elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
         }
 
     }

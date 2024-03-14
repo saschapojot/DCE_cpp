@@ -115,6 +115,7 @@ std::string DCE_Evolution::execPython(const char *cmd) {
 
 ///This function initializes the sparse matrices H0,H2,H3,H6,H7,H8
 void DCE_Evolution::populatedMatrices(){
+    const auto tPopStart{std::chrono::steady_clock::now()};
     //initialize identity matrix
     this->IN1N2=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
     for (int i=0;i<N1*N2;i++){
@@ -218,6 +219,9 @@ void DCE_Evolution::populatedMatrices(){
     H8*=1i*lmd*std::sin(theta)/(4*dx2);
 
     this->HSumStatic=H0+H2+H3+H6+H7+H8;
+    const auto tPopEnd{std::chrono::steady_clock::now()};
+    const std::chrono::duration<double> elapsed_secondsAll{tPopEnd - tPopStart};
+    std::cout<<"populate matrices time: "<< elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
 
 //    std::cout<<"HS="<<HSumStatic<<std::endl;
 
@@ -340,6 +344,7 @@ Eigen::SparseMatrix<std::complex<double>> DCE_Evolution::HDj(const int &j){
 
 ///initialize wavefunction
 void DCE_Evolution::initPsi(){
+    const auto tInitPsiStart{std::chrono::steady_clock::now()};
     this->Psi0=wvVec::Zero(N1*N2);
     for(int n1=0;n1<N1;n1++){
         for(int n2=0;n2<N2;n2++){
@@ -359,6 +364,9 @@ void DCE_Evolution::initPsi(){
     }
     double nm0=Psi0.norm();
     Psi0/=nm0;
+    const auto tInitPsiEnd{std::chrono::steady_clock::now()};
+    const std::chrono::duration<double> elapsed_secondsAll{tInitPsiEnd - tInitPsiStart};
+    std::cout<<"init Psi time: "<< elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
 
 //    std::cout<<"Psi0="<<Psi0<<std::endl;
 
@@ -369,11 +377,16 @@ void DCE_Evolution::initPsi(){
 
 ///create output directories
 void DCE_Evolution::createOutDir(){
+    const auto tCreatDirStart{std::chrono::steady_clock::now()};
     this->outDir="./groupNew"+std::to_string(this->groupNum)+"/row"+std::to_string(this->rowNum)+"/";
 
     if(!fs::is_directory(outDir) || !fs::exists(outDir)){
         fs::create_directories(outDir);
     }
+
+    const auto tCreatDirEnd{std::chrono::steady_clock::now()};
+    const std::chrono::duration<double> elapsed_secondsAll{tCreatDirEnd - tCreatDirStart};
+    std::cout<<"create dir time: "<< elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
 
 
 
@@ -383,6 +396,7 @@ void DCE_Evolution::createOutDir(){
 
 ///initialize time indices and dt
 void DCE_Evolution::initTimeInds(){
+    const auto tInitTimeStart{std::chrono::steady_clock::now()};
     this->tTotPerFlush=this->tFlushStop-this->tFlushStart;
     this->stepsPerFlush=static_cast<int>(std::ceil(tTotPerFlush/dtEst));
     this->dt=tTotPerFlush/static_cast<double >(stepsPerFlush);
@@ -401,6 +415,9 @@ void DCE_Evolution::initTimeInds(){
 //
 //    printVec(tAll);
 
+    const auto tInitTimeEnd{std::chrono::steady_clock::now()};
+    const std::chrono::duration<double> elapsed_secondsAll{tInitTimeEnd - tInitTimeStart};
+    std::cout<<"init time inds time: "<< elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
 
 
 }

@@ -116,21 +116,30 @@ std::string DCE_Evolution::execPython(const char *cmd) {
 ///This function initializes the sparse matrices H0,H2,H3,H6,H7,H8
 void DCE_Evolution::populatedMatrices(){
     const auto tPopStart{std::chrono::steady_clock::now()};
+
+    const auto tIN1N2Start{std::chrono::steady_clock::now()};
     //initialize identity matrix
     this->IN1N2=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
     for (int i=0;i<N1*N2;i++){
         this->IN1N2.insert(i,i)=1.0;
     }
+    const auto tIN1N2End{std::chrono::steady_clock::now()};
+    const std::chrono::duration<double> elapsed_IN1N2{tIN1N2End- tIN1N2Start};
+    std::cout<<"IN1N2 time: "<< elapsed_IN1N2.count() / 3600.0 << " h" << std::endl;
 
 //    this->D2=Eigen::SparseMatrix<std::complex<double>>(N2,N2);
 //    for(int n2=0;n2<N2;n2++){
 //        D2.insert(n2,n2)=this->x2ValsAll[n2];
 //    }
-
+    const auto tH0Start{std::chrono::steady_clock::now()};
     //initialize H0
     this->H0=(-0.5*omegac-0.5*Deltam)*this->IN1N2;
+    const auto tH0End{std::chrono::steady_clock::now()};
+    const std::chrono::duration<double> elapsed_H0{tH0End- tH0Start};
+    std::cout<<"H0 time: "<< elapsed_H0.count() / 3600.0 << " h" << std::endl;
 
     //initialize H2
+    const auto tH2Start{std::chrono::steady_clock::now()};
     this->H2=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
     for(int n1=0;n1<N1;n1++) {
 
@@ -140,8 +149,12 @@ void DCE_Evolution::populatedMatrices(){
         }
     }
     H2*=0.5*std::pow(omegac,2);
+    const auto tH2End{std::chrono::steady_clock::now()};
+    const std::chrono::duration<double> elapsed_H2{tH2End- tH2Start};
+    std::cout<<"H2 time: "<< elapsed_H2.count() / 3600.0 << " h" << std::endl;
 
     //initialize H3
+    const auto tH3Start{std::chrono::steady_clock::now()};
     this->H3=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
 
     std::vector<std::complex<double>> S2Diag;
@@ -157,8 +170,12 @@ void DCE_Evolution::populatedMatrices(){
 
     }
     H3*=(0.5*lmd*omegam*std::cos(theta)+0.5*Deltam*omegam);
+    const auto tH3End{std::chrono::steady_clock::now()};
+    const std::chrono::duration<double> elapsed_H3{tH3End- tH3Start};
+    std::cout<<"H3 time: "<< elapsed_H3.count() / 3600.0 << " h" << std::endl;
 
     //initialize H6
+    const auto tH6Start{std::chrono::steady_clock::now()};
     this->H6=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
     //fill in diagonal values
     for (int i=0;i<N1*N2;i++){
@@ -175,8 +192,12 @@ void DCE_Evolution::populatedMatrices(){
 //    std::cout<<"H6 block="<<H6<<std::endl;
     H6*=-1.0/(2.0*std::pow(dx1,2));
 //        std::cout<<"H6 block="<<H6<<std::endl;
+    const auto tH6End{std::chrono::steady_clock::now()};
+    const std::chrono::duration<double> elapsed_H6{tH6End- tH6Start};
+    std::cout<<"H6 time: "<< elapsed_H6.count() / 3600.0 << " h" << std::endl;
 
     // initialize H7
+    const auto tH7Start{std::chrono::steady_clock::now()};
     this->H7=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
     for(int n1=0;n1<N1;n1++){
         int startingRowPos=n1*N2;
@@ -198,8 +219,12 @@ void DCE_Evolution::populatedMatrices(){
         }
     }
     H7*=(-Deltam/(2*omegam)+lmd*std::cos(theta)/(2*omegam))/(std::pow(dx2,2));
+    const auto tH7End{std::chrono::steady_clock::now()};
+    const std::chrono::duration<double> elapsed_H7{tH7End- tH7Start};
+    std::cout<<"H7 time: "<< elapsed_H7.count() / 3600.0 << " h" << std::endl;
 
     //initialze H8
+    const auto tH8Start{std::chrono::steady_clock::now()};
     this->H8=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
     std::vector<double> upperDiagVals;
     for(int n2=0;n2<N2-1;n2++){
@@ -217,8 +242,16 @@ void DCE_Evolution::populatedMatrices(){
 
     }
     H8*=1i*lmd*std::sin(theta)/(4*dx2);
+    const auto tH8End{std::chrono::steady_clock::now()};
+    const std::chrono::duration<double> elapsed_H8{tH8End- tH8Start};
+    std::cout<<"H8 time: "<< elapsed_H8.count() / 3600.0 << " h" << std::endl;
 
+    const auto tHSumStart{std::chrono::steady_clock::now()};
     this->HSumStatic=H0+H2+H3+H6+H7+H8;
+    const auto tHSumEnd{std::chrono::steady_clock::now()};
+    const std::chrono::duration<double> elapsed_HSum{tHSumEnd- tHSumStart};
+    std::cout<<"HSum time: "<< elapsed_HSum.count() / 3600.0 << " h" << std::endl;
+
     const auto tPopEnd{std::chrono::steady_clock::now()};
     const std::chrono::duration<double> elapsed_secondsAll{tPopEnd - tPopStart};
     std::cout<<"populate matrices time: "<< elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;

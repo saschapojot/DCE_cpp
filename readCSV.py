@@ -2,7 +2,7 @@ import pandas as pd
 from pathlib import Path
 import sys
 
-#file.py groupNum rowNum
+#python readCSV.py groupNum rowNum
 if len(sys.argv)!=3:
     print("wrong number of arguments")
 

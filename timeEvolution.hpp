@@ -104,9 +104,9 @@ public:
 
 
      static const int N1=500;
-     static const int N2=1024;
+     static const int N2=2048;
     double L1=5;
-    double L2=20;
+    double L2=40;
 
 
     double dx1=2*L1/(static_cast<double>(N1));
@@ -114,7 +114,7 @@ public:
     double dtEst=0.002;
     double tFlushStart=0;
     double tFlushStop=0.01;
-    int flushNum=3;
+    int flushNum=300;
     std::vector<int> jIndsAll;//index for time steps
     double tTotPerFlush=0;
     int stepsPerFlush=0;//total time steps

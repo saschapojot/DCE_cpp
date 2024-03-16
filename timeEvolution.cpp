@@ -117,29 +117,26 @@ std::string DCE_Evolution::execPython(const char *cmd) {
 void DCE_Evolution::populatedMatrices(){
     const auto tPopStart{std::chrono::steady_clock::now()};
 
-    const auto tIN1N2Start{std::chrono::steady_clock::now()};
+//    const auto tIN1N2Start{std::chrono::steady_clock::now()};
     //initialize identity matrix
     this->IN1N2=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
     for (int i=0;i<N1*N2;i++){
         this->IN1N2.insert(i,i)=1.0;
     }
-    const auto tIN1N2End{std::chrono::steady_clock::now()};
-    const std::chrono::duration<double> elapsed_IN1N2{tIN1N2End- tIN1N2Start};
-    std::cout<<"IN1N2 time: "<< elapsed_IN1N2.count() / 3600.0 << " h" << std::endl;
+//    const auto tIN1N2End{std::chrono::steady_clock::now()};
+//    const std::chrono::duration<double> elapsed_IN1N2{tIN1N2End- tIN1N2Start};
+//    std::cout<<"IN1N2 time: "<< elapsed_IN1N2.count() / 3600.0 << " h" << std::endl;
 
-//    this->D2=Eigen::SparseMatrix<std::complex<double>>(N2,N2);
-//    for(int n2=0;n2<N2;n2++){
-//        D2.insert(n2,n2)=this->x2ValsAll[n2];
-//    }
-    const auto tH0Start{std::chrono::steady_clock::now()};
+
+//    const auto tH0Start{std::chrono::steady_clock::now()};
     //initialize H0
     this->H0=(-0.5*omegac-0.5*Deltam)*this->IN1N2;
-    const auto tH0End{std::chrono::steady_clock::now()};
-    const std::chrono::duration<double> elapsed_H0{tH0End- tH0Start};
-    std::cout<<"H0 time: "<< elapsed_H0.count() / 3600.0 << " h" << std::endl;
+//    const auto tH0End{std::chrono::steady_clock::now()};
+//    const std::chrono::duration<double> elapsed_H0{tH0End- tH0Start};
+//    std::cout<<"H0 time: "<< elapsed_H0.count() / 3600.0 << " h" << std::endl;
 
     //initialize H2
-    const auto tH2Start{std::chrono::steady_clock::now()};
+//    const auto tH2Start{std::chrono::steady_clock::now()};
     this->H2=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
     for(int n1=0;n1<N1;n1++) {
 
@@ -149,12 +146,12 @@ void DCE_Evolution::populatedMatrices(){
         }
     }
     H2*=0.5*std::pow(omegac,2);
-    const auto tH2End{std::chrono::steady_clock::now()};
-    const std::chrono::duration<double> elapsed_H2{tH2End- tH2Start};
-    std::cout<<"H2 time: "<< elapsed_H2.count() / 3600.0 << " h" << std::endl;
+//    const auto tH2End{std::chrono::steady_clock::now()};
+//    const std::chrono::duration<double> elapsed_H2{tH2End- tH2Start};
+//    std::cout<<"H2 time: "<< elapsed_H2.count() / 3600.0 << " h" << std::endl;
 
     //initialize H3
-    const auto tH3Start{std::chrono::steady_clock::now()};
+//    const auto tH3Start{std::chrono::steady_clock::now()};
     this->H3=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
 
     std::vector<std::complex<double>> S2Diag;
@@ -170,12 +167,12 @@ void DCE_Evolution::populatedMatrices(){
 
     }
     H3*=(0.5*lmd*omegam*std::cos(theta)+0.5*Deltam*omegam);
-    const auto tH3End{std::chrono::steady_clock::now()};
-    const std::chrono::duration<double> elapsed_H3{tH3End- tH3Start};
-    std::cout<<"H3 time: "<< elapsed_H3.count() / 3600.0 << " h" << std::endl;
+//    const auto tH3End{std::chrono::steady_clock::now()};
+//    const std::chrono::duration<double> elapsed_H3{tH3End- tH3Start};
+//    std::cout<<"H3 time: "<< elapsed_H3.count() / 3600.0 << " h" << std::endl;
 
     //initialize H6
-    const auto tH6Start{std::chrono::steady_clock::now()};
+//    const auto tH6Start{std::chrono::steady_clock::now()};
     this->H6=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
     //fill in diagonal values
     for (int i=0;i<N1*N2;i++){
@@ -192,39 +189,40 @@ void DCE_Evolution::populatedMatrices(){
 //    std::cout<<"H6 block="<<H6<<std::endl;
     H6*=-1.0/(2.0*std::pow(dx1,2));
 //        std::cout<<"H6 block="<<H6<<std::endl;
-    const auto tH6End{std::chrono::steady_clock::now()};
-    const std::chrono::duration<double> elapsed_H6{tH6End- tH6Start};
-    std::cout<<"H6 time: "<< elapsed_H6.count() / 3600.0 << " h" << std::endl;
+//    const auto tH6End{std::chrono::steady_clock::now()};
+//    const std::chrono::duration<double> elapsed_H6{tH6End- tH6Start};
+//    std::cout<<"H6 time: "<< elapsed_H6.count() / 3600.0 << " h" << std::endl;
 
     // initialize H7
-    const auto tH7Start{std::chrono::steady_clock::now()};
+//    const auto tH7Start{std::chrono::steady_clock::now()};
     this->H7=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
-    for(int n1=0;n1<N1;n1++){
-        int startingRowPos=n1*N2;
-        int startingColPos=n1*N2;
-        //construct each Q2 matrix
 
-        //diagonal
-        for(int n2=0;n2<N2;n2++){
-            H7.insert(startingRowPos+n2,startingColPos+n2)=-2.0;
-        }
-
-        //upper superdiagonal
-        for(int n2=0;n2<N2-1;n2++){
-            H7.insert(startingRowPos+n2,startingColPos+n2+1)=1.0;
-        }
-        //lower subdiagonal
-        for(int n2=1;n2<N2;n2++){
-            H7.insert(startingRowPos+n2,startingColPos+n2-1)=1.0;
+    //H7's upper and lower diagonal indices
+    std::vector<int> H7UpperRowInds;
+    H7UpperRowInds.reserve((N2-1)*N1);
+    for(int n2=0;n2<N1*N2;n2++){
+        if ((n2+1)%N2==0){
+            continue;
+        }else{
+            H7UpperRowInds.push_back(n2);
         }
     }
+    //H7's diagonal
+    for(int i=0;i<N1*N2;i++){
+        H7.insert(i,i)=-2.0;
+    }
+    //H7's upper and lower diagonal
+    for(const auto &n2:H7UpperRowInds){
+        H7.insert(n2,n2+1)=1.0;
+        H7.insert(n2+1,n2)=1.0;
+    }
     H7*=(-Deltam/(2*omegam)+lmd*std::cos(theta)/(2*omegam))/(std::pow(dx2,2));
-    const auto tH7End{std::chrono::steady_clock::now()};
-    const std::chrono::duration<double> elapsed_H7{tH7End- tH7Start};
-    std::cout<<"H7 time: "<< elapsed_H7.count() / 3600.0 << " h" << std::endl;
+//    const auto tH7End{std::chrono::steady_clock::now()};
+//    const std::chrono::duration<double> elapsed_H7{tH7End- tH7Start};
+//    std::cout<<"H7 time: "<< elapsed_H7.count() / 3600.0 << " h" << std::endl;
 
     //initialze H8
-    const auto tH8Start{std::chrono::steady_clock::now()};
+//    const auto tH8Start{std::chrono::steady_clock::now()};
     this->H8=Eigen::SparseMatrix<std::complex<double>>(N1*N2,N1*N2);
     std::vector<double> upperDiagVals;
     for(int n2=0;n2<N2-1;n2++){
@@ -242,15 +240,15 @@ void DCE_Evolution::populatedMatrices(){
 
     }
     H8*=1i*lmd*std::sin(theta)/(4*dx2);
-    const auto tH8End{std::chrono::steady_clock::now()};
-    const std::chrono::duration<double> elapsed_H8{tH8End- tH8Start};
-    std::cout<<"H8 time: "<< elapsed_H8.count() / 3600.0 << " h" << std::endl;
+//    const auto tH8End{std::chrono::steady_clock::now()};
+//    const std::chrono::duration<double> elapsed_H8{tH8End- tH8Start};
+//    std::cout<<"H8 time: "<< elapsed_H8.count() / 3600.0 << " h" << std::endl;
 
-    const auto tHSumStart{std::chrono::steady_clock::now()};
+//    const auto tHSumStart{std::chrono::steady_clock::now()};
     this->HSumStatic=H0+H2+H3+H6+H7+H8;
-    const auto tHSumEnd{std::chrono::steady_clock::now()};
-    const std::chrono::duration<double> elapsed_HSum{tHSumEnd- tHSumStart};
-    std::cout<<"HSum time: "<< elapsed_HSum.count() / 3600.0 << " h" << std::endl;
+//    const auto tHSumEnd{std::chrono::steady_clock::now()};
+//    const std::chrono::duration<double> elapsed_HSum{tHSumEnd- tHSumStart};
+//    std::cout<<"HSum time: "<< elapsed_HSum.count() / 3600.0 << " h" << std::endl;
 
     const auto tPopEnd{std::chrono::steady_clock::now()};
     const std::chrono::duration<double> elapsed_secondsAll{tPopEnd - tPopStart};
@@ -463,24 +461,27 @@ wvVec DCE_Evolution::evolutionPerFlush(const int &fls, const wvVec& initVec){
     int startingInd=fls*this->stepsPerFlush;
 
     int nextStartingInd=startingInd+stepsPerFlush;
+    std::cout<<"starting loop: "<<startingInd<<", ending loop: "<<nextStartingInd-1<<std::endl;
+
     const auto tStart{std::chrono::steady_clock::now()};
     std::vector<wvVec> PsiPerFlush;
+    PsiPerFlush.reserve(stepsPerFlush+1);
     PsiPerFlush.push_back(initVec);
     wvVec PsiCurr=initVec;
     for(int j=startingInd;j<nextStartingInd;j++){
+
         wvVec PsiNext= oneStepEvolution(j,PsiCurr);
         PsiPerFlush.push_back(PsiNext);
         PsiCurr=PsiNext;
-        if(j%2==0){
-            std::cout<<"loop "<<j<<std::endl;
-            const auto tEnd{std::chrono::steady_clock::now()};
-            const std::chrono::duration<double> elapsed_secondsAll{tEnd - tStart};
-            std::cout<<"2-loop time: "<< elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
-        }
+
 
     }
 
+    const auto tEnd{std::chrono::steady_clock::now()};
+    const std::chrono::duration<double> elapsed_secondsAll{tEnd - tStart};
+    std::cout<<"flush "<<fls<<" time: "<< elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
 
+    const auto tOutStart{std::chrono::steady_clock::now()};
     std::vector<std::vector<std::complex<double>>> outData=this->eigen2cppType(PsiPerFlush);
 
 
@@ -491,7 +492,13 @@ wvVec DCE_Evolution::evolutionPerFlush(const int &fls, const wvVec& initVec){
     msgpack::pack(ofs,outData);
     ofs.close();
 
+    const auto tOutEnd{std::chrono::steady_clock::now()};
+    const std::chrono::duration<double> elapsed_Out{tOutEnd - tOutStart};
+    std::cout<<"Out time: "<< elapsed_Out.count() / 3600.0 << " h" << std::endl;
+
     int length=PsiPerFlush.size();
+
+
     return PsiPerFlush[length-1];
 
 }
@@ -504,14 +511,14 @@ wvVec DCE_Evolution::evolutionPerFlush(const int &fls, const wvVec& initVec){
 /// @return wavefunction after evolution
 wvVec DCE_Evolution::oneStepEvolution(const int& j, const wvVec& PsiCurr){
 
-    const auto tInitHStart{std::chrono::steady_clock::now()};
+//    const auto tInitHStart{std::chrono::steady_clock::now()};
     Eigen::SparseMatrix<std::complex<double>> HDjMat= HDj(j);
-    const auto tInitHEnd{std::chrono::steady_clock::now()};
-    const std::chrono::duration<double> elapsed_secondsAll{tInitHEnd - tInitHStart};
-    std::cout<<"init H: "<< elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
+//    const auto tInitHEnd{std::chrono::steady_clock::now()};
+//    const std::chrono::duration<double> elapsed_secondsAll{tInitHEnd - tInitHStart};
+//    std::cout<<"init H: "<< elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
 
 
-    const auto tSolve_yStart{std::chrono::steady_clock::now()};
+//    const auto tSolve_yStart{std::chrono::steady_clock::now()};
     Eigen::SparseMatrix<std::complex<double>> mat0Tmp=0.5*1i*dt*HDjMat;
     //add scalar 1 to matTmp, i.e., add identity matrix to matTmp
     for(int i=0;i<N1*N2;i++){
@@ -521,20 +528,20 @@ wvVec DCE_Evolution::oneStepEvolution(const int& j, const wvVec& PsiCurr){
     Eigen::BiCGSTAB<Eigen::SparseMatrix<std::complex<double>>> solver;
     solver.compute(mat0Tmp);
     wvVec y=solver.solve(PsiCurr);
-    const auto tSolve_yEnd{std::chrono::steady_clock::now()};
-    const std::chrono::duration<double> elapsed_Solve_y{tSolve_yEnd- tSolve_yStart};
-    std::cout<<"solve y: "<< elapsed_Solve_y.count() / 3600.0 << " h" << std::endl;
+//    const auto tSolve_yEnd{std::chrono::steady_clock::now()};
+//    const std::chrono::duration<double> elapsed_Solve_y{tSolve_yEnd- tSolve_yStart};
+//    std::cout<<"solve y: "<< elapsed_Solve_y.count() / 3600.0 << " h" << std::endl;
 
-    const auto tProdStart{std::chrono::steady_clock::now()};
+//    const auto tProdStart{std::chrono::steady_clock::now()};
     Eigen::SparseMatrix<std::complex<double>> mat1Tmp=-0.5*1i*dt*HDjMat;
     for(int i=0;i<N1*N2;i++){
         mat1Tmp.coeffRef(i,i)+=1.0;
     }
 
     wvVec PsiNext=mat1Tmp*y;
-    const auto tProdEnd{std::chrono::steady_clock::now()};
-    const std::chrono::duration<double> elapsedProd{tProdEnd- tProdStart};
-    std::cout<<"prod: "<< elapsedProd.count() / 3600.0 << " h" << std::endl;
+//    const auto tProdEnd{std::chrono::steady_clock::now()};
+//    const std::chrono::duration<double> elapsedProd{tProdEnd- tProdStart};
+//    std::cout<<"prod: "<< elapsedProd.count() / 3600.0 << " h" << std::endl;
     return PsiNext;
 
 

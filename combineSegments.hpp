@@ -15,7 +15,7 @@
 #include <msgpack.hpp>
 #include <Eigen/Sparse>
 #include <boost/json.hpp>
-#include <future>
+//#include <future>
 
 
 
@@ -161,7 +161,11 @@ public:
 
     ///
     /// @return photon numbers at each time
-    std::vector<double> photonAll();
+    std::vector<double> photonAllParallel();
+
+    ///
+    /// @return photon numbers at each time
+    std::vector<double> photonAllSerial();
 
 
     ///
@@ -171,7 +175,11 @@ public:
 
     ///
     /// @return phonon numbers at each time
-    std::vector<double> phononAll();
+    std::vector<double> phononAllParallel();
+
+    ///
+    /// @return phonon numbers at each time
+    std::vector<double> phononAllSerial();
 
     /// write to json
     /// @param photonNumAll all photon numbers

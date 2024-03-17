@@ -21,8 +21,8 @@ int main(int argc, char *argv[]) {
 
     loader.solutions = loader.cppType2Eigen();
 
-    std::vector<double> pn = loader.photonAll();
-    std::vector<double> ph = loader.phononAll();
+    std::vector<double> pn = loader.photonAllSerial();
+    std::vector<double> ph = loader.phononAllSerial();
 //    loader.printVec(pn);
 //    loader.printVec(ph);
 loader.to_json(pn,ph);

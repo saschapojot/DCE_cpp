@@ -397,41 +397,63 @@ double combineSegments::numOfPhonon(const wvVec &vec){
 
 ///
 /// @return photon numbers at each time
-std::vector<double> combineSegments::photonAll(){
-
-    std::vector<std::future<double>> futures;
-    for(const auto&vec:this->solutions){
-        std::future<double> fut=std::async(std::launch::async,&combineSegments::numOfPhoton,this,vec);
-        futures.push_back(std::move(fut));
-    }
-    std::vector<double>retVec;
-    for(auto& fut:futures){
-        retVec.push_back(fut.get());
-    }
-    return retVec;
-
-
-}
+//std::vector<double> combineSegments::photonAllParallel(){
+//
+//    std::vector<std::future<double>> futures;
+//    for(const auto&vec:this->solutions){
+//        std::future<double> fut=std::async(std::launch::async,&combineSegments::numOfPhoton,this,vec);
+//        futures.push_back(std::move(fut));
+//    }
+//    std::vector<double>retVec;
+//    for(auto& fut:futures){
+//        retVec.push_back(fut.get());
+//    }
+//    return retVec;
+//
+//
+//}
 
 
 
 ///
 /// @return phonon numbers at each time
-std::vector<double> combineSegments::phononAll(){
-    std::vector<std::future<double>> futures;
-    for(const auto&vec:this->solutions){
-        std::future<double> fut=std::async(std::launch::async,&combineSegments::numOfPhonon,this,vec);
-        futures.push_back(std::move(fut));
-    }
+//std::vector<double> combineSegments::phononAllParallel(){
+//    std::vector<std::future<double>> futures;
+//    for(const auto&vec:this->solutions){
+//        std::future<double> fut=std::async(std::launch::async,&combineSegments::numOfPhonon,this,vec);
+//        futures.push_back(std::move(fut));
+//    }
+//
+//
+//    std::vector<double>retVec;
+//    for(auto& fut:futures){
+//        retVec.push_back(fut.get());
+//    }
+//    return retVec;
+//
+//
+//
+//}
 
-
+///
+/// @return photon numbers at each time
+std::vector<double> combineSegments::photonAllSerial(){
     std::vector<double>retVec;
-    for(auto& fut:futures){
-        retVec.push_back(fut.get());
+    for(const auto&vec:this->solutions){
+        retVec.push_back(this->numOfPhoton(vec));
     }
     return retVec;
 
+}
 
+///
+/// @return phonon numbers at each time
+std::vector<double> combineSegments::phononAllSerial(){
+    std::vector<double>retVec;
+    for(const auto&vec:this->solutions){
+        retVec.push_back(this->numOfPhonon(vec));
+    }
+    return retVec;
 
 }
 

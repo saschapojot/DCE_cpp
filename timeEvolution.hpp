@@ -15,7 +15,8 @@
 #include <vector>
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
-#include <unsupported/Eigen/KroneckerProduct>
+//#include <Eigen/SparseLU>
+#include <Eigen/IterativeLinearSolvers>
 #include <boost/filesystem.hpp>
 #include <memory>
 #include <msgpack.hpp>

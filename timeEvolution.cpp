@@ -484,14 +484,14 @@ wvVec DCE_Evolution::evolutionPerFlush(const int &fls, const wvVec& initVec){
     std::cout<<"starting loop: "<<startingInd<<", ending loop: "<<nextStartingInd-1<<std::endl;
 
     const auto tStart{std::chrono::steady_clock::now()};
-    std::vector<wvVec> PsiPerFlush;
-    PsiPerFlush.reserve(stepsPerFlush+1);
-    PsiPerFlush.push_back(initVec);
+    std::unique_ptr<std::vector<wvVec>> PsiPerFlushPtr=std::make_unique<std::vector<wvVec>>();
+    PsiPerFlushPtr->reserve(stepsPerFlush+1);
+    PsiPerFlushPtr->push_back(initVec);
     wvVec PsiCurr=initVec;
     for(int j=startingInd;j<nextStartingInd;j++){
 
         wvVec PsiNext= oneStepEvolution(j,PsiCurr);
-        PsiPerFlush.push_back(PsiNext);
+        PsiPerFlushPtr->push_back(PsiNext);
         PsiCurr=PsiNext;
 
 
@@ -502,7 +502,7 @@ wvVec DCE_Evolution::evolutionPerFlush(const int &fls, const wvVec& initVec){
     std::cout<<"flush "<<fls<<" time: "<< elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
 
     const auto tOutStart{std::chrono::steady_clock::now()};
-    std::vector<std::vector<std::complex<double>>> outData=this->eigen2cppType(PsiPerFlush);
+    std::vector<std::vector<std::complex<double>>> outData=this->eigen2cppType(PsiPerFlushPtr);
 
 
     std::string outFile=this->outDir+"flush"+std::to_string(fls)+"N1"+std::to_string(N1)
@@ -516,10 +516,10 @@ wvVec DCE_Evolution::evolutionPerFlush(const int &fls, const wvVec& initVec){
     const std::chrono::duration<double> elapsed_Out{tOutEnd - tOutStart};
     std::cout<<"Out time: "<< elapsed_Out.count() / 3600.0 << " h" << std::endl;
 
-    int length=PsiPerFlush.size();
+    int length=(*PsiPerFlushPtr).size();
 
 
-    return PsiPerFlush[length-1];
+    return (*PsiPerFlushPtr)[length-1];
 
 }
 
@@ -594,7 +594,7 @@ void DCE_Evolution::evolution(){
     for(int fls=0;fls<this->flushNum;fls++){
         wvVec PsiFinal=this->evolutionPerFlush(fls,PsiInit);
         PsiInit=PsiFinal;
-        std::cout<<"flush "<<fls<<std::endl;
+//        std::cout<<"flush "<<fls<<std::endl;
 
 
     }
@@ -615,4 +615,21 @@ double DCE_Evolution::fillOneValInPsi(const int& ind) {
                     * std::exp(-0.5 * omegam * std::pow(x2Tmp, 2))
                     *std::hermite(this->jH2,std::sqrt(omegam)*x2Tmp);
     return valTmp;
+}
+
+
+///
+/// @param solutionsPtr unique ptr of solutions per flush
+/// @return converted to cpp data type
+std::vector<std::vector<std::complex<double>>> DCE_Evolution::eigen2cppType(const std::unique_ptr<std::vector<wvVec >> &solutionsPtr){
+    std::vector<std::vector<std::complex<double>>> retData;
+    for(const auto& eigenTypeVec:*solutionsPtr){
+        std::vector<std::complex<double>> oneVec;
+        for(int i=0;i<eigenTypeVec.size();i++){
+            oneVec.push_back(eigenTypeVec(i));
+        }
+        retData.push_back(oneVec);
+    }
+    return retData;
+
 }

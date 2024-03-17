@@ -199,7 +199,10 @@ public:
     /// @return converted to cpp data type
     std::vector<std::vector<std::complex<double>>> eigen2cppType(const std::vector<wvVec > & solutions);
 
-
+    ///
+    /// @param solutionsPtr unique ptr of solutions per flush
+    /// @return converted to cpp data type
+    std::vector<std::vector<std::complex<double>>>eigen2cppType(const std::unique_ptr<std::vector<wvVec >> &solutionsPtr);
 
 };
 namespace msgpack {

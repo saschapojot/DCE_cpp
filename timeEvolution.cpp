@@ -374,7 +374,7 @@ Eigen::SparseMatrix<std::complex<double>> DCE_Evolution::HDj(const int &j){
 }
 
 ///initialize wavefunction
-void DCE_Evolution::initPsi(){
+void DCE_Evolution::initPsiSerial(){
     const auto tInitPsiStart{std::chrono::steady_clock::now()};
     this->Psi0=wvVec::Zero(N1*N2);
     for(int n1=0;n1<N1;n1++){
@@ -405,6 +405,32 @@ void DCE_Evolution::initPsi(){
 
 }
 
+
+///initialize wavefunction in parallel
+void DCE_Evolution::initPsiParallel() {
+    const auto tInitPsiStart{std::chrono::steady_clock::now()};
+    std::vector<std::future<double>> futures;
+    for (int i = 0; i < N1 * N2; i++) {
+        std::future<double> fut = std::async(std::launch::async, &DCE_Evolution::fillOneValInPsi, this, i);
+        futures.push_back(std::move(fut));
+    }
+
+    std::vector<double> retVec;
+    for (auto &fut: futures) {
+        retVec.push_back(fut.get());
+    }
+
+
+    this->Psi0 = wvVec(N1 * N2);
+    for (int i = 0; i < N1 * N2; i++) {
+        this->Psi0(i) = retVec[i];
+    }
+    double nm0=Psi0.norm();
+    Psi0/=nm0;
+    const auto tInitPsiEnd{std::chrono::steady_clock::now()};
+    const std::chrono::duration<double> elapsed_secondsAll{tInitPsiEnd - tInitPsiStart};
+    std::cout<<"init Psi time: "<< elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
+}
 
 ///create output directories
 void DCE_Evolution::createOutDir(){
@@ -579,4 +605,20 @@ void DCE_Evolution::evolution(){
 
     }
 
+}
+
+
+///
+/// @param ind index in Psi
+/// @return Psi[ind]
+double DCE_Evolution::fillOneValInPsi(const int& ind) {
+    int n2 = ind % N2;
+    int n1 = static_cast<int>((ind - n2) / N2);
+    double x1Tmp = this->x1ValsAll[n1];
+    double x2Tmp = this->x2ValsAll[n2];
+    double valTmp = std::exp(-0.5 * omegac * std::pow(x1Tmp, 2))
+            * std::hermite(this->jH1, std::sqrt(omegac) * x1Tmp)
+                    * std::exp(-0.5 * omegam * std::pow(x2Tmp, 2))
+                    *std::hermite(this->jH2,std::sqrt(omegam)*x2Tmp);
+    return valTmp;
 }

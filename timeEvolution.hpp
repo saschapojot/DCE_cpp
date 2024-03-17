@@ -14,12 +14,15 @@
 #include <complex>
 #include <vector>
 #include <Eigen/Sparse>
+#include <Eigen/Dense>
 #include <unsupported/Eigen/KroneckerProduct>
 #include <boost/filesystem.hpp>
 #include <memory>
 #include <msgpack.hpp>
 #include <fstream>
 #include <chrono>
+#include <future>
+
 namespace fs = boost::filesystem;
 using namespace std::complex_literals;
 const auto PI=std::numbers::pi;
@@ -68,8 +71,16 @@ public:
     /// @return H5j
     Eigen::SparseMatrix<std::complex<double>>H5Val(const int& j);
 
-    ///initialize wavefunction
-    void initPsi();
+    ///
+    /// @param ind index in Psi
+    /// @return Psi[ind]
+    double fillOneValInPsi(const int& ind);
+
+    ///initialize wavefunction serially
+    void initPsiSerial();
+
+    ///initialize wavefunction in parallel
+    void initPsiParallel();
 
 
     template<class T>

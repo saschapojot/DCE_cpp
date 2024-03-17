@@ -376,30 +376,24 @@ Eigen::SparseMatrix<std::complex<double>> DCE_Evolution::HDj(const int &j){
 ///initialize wavefunction
 void DCE_Evolution::initPsiSerial(){
     const auto tInitPsiStart{std::chrono::steady_clock::now()};
-    this->Psi0=wvVec::Zero(N1*N2);
-    for(int n1=0;n1<N1;n1++){
-        for(int n2=0;n2<N2;n2++){
 
-            int pos=n1*N2+n2;
-            double x1Tmp=this->x1ValsAll[n1];
-            double x2Tmp=this->x2ValsAll[n2];
-            double valTmp=std::exp(-0.5*omegac*std::pow(x1Tmp,2))
-                    *std::hermite(this->jH1,std::sqrt(omegac)*x1Tmp)
-                    *std::exp(-0.5*omegam*std::pow(x2Tmp,2))
-                    *std::hermite(this->jH2,std::sqrt(omegam)*x2Tmp);
-            this->Psi0[pos]=valTmp;
-//            std::cout<<"valTmp="<<valTmp<<std::endl;
-
-
-        }
+    std::vector<double> valVec;
+    for(int i=0;i<N1*N2;i++){
+        valVec.push_back(this->fillOneValInPsi(i));
     }
+
+    this->Psi0=wvVec (N1*N2);
+    for(int i=0;i<N1*N2;i++){
+        this->Psi0(i)=valVec[i];
+    }
+
     double nm0=Psi0.norm();
     Psi0/=nm0;
     const auto tInitPsiEnd{std::chrono::steady_clock::now()};
     const std::chrono::duration<double> elapsed_secondsAll{tInitPsiEnd - tInitPsiStart};
     std::cout<<"init Psi time: "<< elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
 
-//    std::cout<<"Psi0="<<Psi0<<std::endl;
+
 
 
 

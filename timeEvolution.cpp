@@ -485,13 +485,19 @@ wvVec DCE_Evolution::evolutionPerFlush(const int &fls, const wvVec& initVec){
 
     const auto tStart{std::chrono::steady_clock::now()};
     std::unique_ptr<std::vector<wvVec>> PsiPerFlushPtr=std::make_unique<std::vector<wvVec>>();
-    PsiPerFlushPtr->reserve(stepsPerFlush+1);
-    PsiPerFlushPtr->push_back(initVec);
+    PsiPerFlushPtr->resize(stepsPerFlush+1);
+
+   for(auto &vec:*PsiPerFlushPtr){
+       vec=wvVec (N1*N2);
+   }
+    (*PsiPerFlushPtr)[0]=initVec;
     wvVec PsiCurr=initVec;
+    int counter=1;
     for(int j=startingInd;j<nextStartingInd;j++){
 
         wvVec PsiNext= oneStepEvolution(j,PsiCurr);
-        PsiPerFlushPtr->push_back(PsiNext);
+        (*PsiPerFlushPtr)[counter]=(PsiNext);
+        counter++;
         PsiCurr=PsiNext;
 
 

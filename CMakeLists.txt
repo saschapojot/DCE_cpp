@@ -16,9 +16,10 @@ if (Boost_NO_SYSTEM_PATHS)
     set(Boost_LIBRARY_DIR "/home/polya/cppLocal/boostBuild/lib")
 endif (Boost_NO_SYSTEM_PATHS)
 
-add_executable(DCE main.cpp timeEvolution.cpp
-        )
-find_package(Boost  REQUIRED filesystem)
+add_executable(DCE main.cpp timeEvolution.cpp)
+add_executable(num combineSegments.cpp computeNum.cpp)
+
+find_package(Boost  REQUIRED filesystem json)
 
 
 
@@ -36,10 +37,15 @@ endif()
 set_source_files_properties(
         timeEvolution.cpp
         PROPERTIES
-        COMPILE_OPTIONS "-Ofast"
+        COMPILE_OPTIONS "-O3"
 )
 
 file(GLOB LIBS_A "${Boost_LIBRARY_DIR}/*filesystem.a")
 file(GLOB LIBS_SO "${Boost_LIBRARY_DIR}/*filesystem.so")
 
 target_link_libraries(DCE ${LIBS_A} ${LIBS_SO})
+target_link_libraries(num ${LIBS_A} ${LIBS_SO})
+
+
+
+target_link_libraries(num Boost::json)

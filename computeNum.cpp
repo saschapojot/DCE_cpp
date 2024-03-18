@@ -16,28 +16,25 @@ int main(int argc, char *argv[]) {
     loader.catchParameters(sortedFiles[0]);
     loader.initTimeInds();
 
+
 //    loader.readBinFiles(sortedFiles);
     loader.popolateMatrices();
+
     std::vector<std::vector<double>> photonNumFromAllFlushes;
     std::vector<std::vector<double>> phononNumFromAllFlushes;
     for(const auto&name:sortedFiles){
         const auto tOneFlushStart{std::chrono::steady_clock::now()};
         std::vector<std::vector<std::complex<double>>> inVec=loader.readOneBinFile(name);
-        std::cout<<"finish loading one file"<<std::endl;
+
         std::vector<wvVec > solutionsInOneFlush=loader.cppType2EigenOneFile(inVec);
-        std::cout<<"finish converting one file"<<std::endl;
 
-        const auto tPhotonStart{std::chrono::steady_clock::now()};
+
+
         std::vector<double> photonsPerFlush=loader.photonPerFlushSerial(solutionsInOneFlush);
-        const auto tPhotonEnd{std::chrono::steady_clock::now()};
-        const std::chrono::duration<double> elapsed_photon{tPhotonEnd - tPhotonStart};
-        std::cout << "photon time: " << elapsed_photon.count() / 3600.0 << " h" << std::endl;
 
-        const auto tPhononStart{std::chrono::steady_clock::now()};
+
         std::vector<double> phononsPerFlush=loader.phononPerFlushSerial(solutionsInOneFlush);
-        const auto tPhononEnd{std::chrono::steady_clock::now()};
-        const std::chrono::duration<double> elapsed_phonon{tPhononEnd - tPhononStart};
-        std::cout << "phonon time: " << elapsed_phonon.count() / 3600.0 << " h" << std::endl;
+
 
 
         photonNumFromAllFlushes.push_back(photonsPerFlush);
@@ -47,6 +44,8 @@ int main(int argc, char *argv[]) {
     std::cout << "One flush time: " << elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
     }
 
+    std::vector<double> photonVals=loader.removeHeadTail(photonNumFromAllFlushes);
+    std::cout<<photonVals.size()<<std::endl;
 //    loader.solutions = loader.cppType2Eigen();
 
 //    std::vector<double> pn = loader.photonAllSerial();
@@ -58,3 +57,5 @@ int main(int argc, char *argv[]) {
 
 
 }
+
+

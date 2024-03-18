@@ -209,6 +209,10 @@ public:
     /// @return phonon numbers in one flush
     std::vector<double> phononPerFlushSerial(const std::vector<wvVec >& solutionsPerFlush);
 
+    ///
+    /// @param numVecvec photon/phonon numbers
+    /// @return duplicated entries removed
+    std::vector<double> removeHeadTail(const std::vector<std::vector<double>> &numVecvec);
 
     /// write to json
     /// @param photonNumAll all photon numbers

@@ -219,6 +219,10 @@ public:
     /// @param phononNumAll all phonon numbers
     void to_json(const std::vector<double> &photonNumAll,const std::vector<double> &phononNumAll);
 
+    ///write the init wavefunction and last wavefunction to xml file
+    ///
+    /// @param vec initial or final wavefunction
+    void writeInitLast(const std::string &filename,std::vector<std::complex<double>>& vec);
 };
 
 

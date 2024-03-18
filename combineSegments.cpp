@@ -644,3 +644,15 @@ std::vector<double> combineSegments::removeHeadTail(const std::vector<std::vecto
 
     return retVec;
 }
+
+
+///write the init wavefunction and last wavefunction to xml file
+///
+/// @param vec initial or final wavefunction
+void combineSegments::writeInitLast(const std::string &filename,std::vector<std::complex<double>>& vec){
+
+    std::ofstream ofs(filename);
+    boost::archive::xml_oarchive oa(ofs);
+    oa & BOOST_SERIALIZATION_NVP(vec);
+
+}

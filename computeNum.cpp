@@ -22,40 +22,51 @@ int main(int argc, char *argv[]) {
 
     std::vector<std::vector<double>> photonNumFromAllFlushes;
     std::vector<std::vector<double>> phononNumFromAllFlushes;
-    for(const auto&name:sortedFiles){
-        const auto tOneFlushStart{std::chrono::steady_clock::now()};
-        std::vector<std::vector<std::complex<double>>> inVec=loader.readOneBinFile(name);
+    const auto tStart{std::chrono::steady_clock::now()};
+    for (int j = 0; j < sortedFiles.size(); j++) {
+        if(j%20==0) {
+            std::cout<<"flush "<<j<<std::endl;
+        }
+        std::string name = sortedFiles[j];
 
-        std::vector<wvVec > solutionsInOneFlush=loader.cppType2EigenOneFile(inVec);
+        std::vector<std::vector<std::complex<double>>> inVec = loader.readOneBinFile(name);
+        std::string suffix = "N1" + std::to_string(loader.N1) + "N2" + std::to_string(loader.N2)
+                             + "L1" + std::to_string(loader.L1) + "L2" + std::to_string(loader.L2);
+
+        if (j == 0) {
+            std::string outInitName = loader.outDir + suffix + "init.xml";
+            loader.writeInitLast(outInitName, inVec[0]);
+        }
+        if (j == sortedFiles.size() - 1) {
+            std::string outLastName = loader.outDir + suffix + "final.xml";
+            int lengthTmp = inVec.size();
+            loader.writeInitLast(outLastName, inVec[lengthTmp - 1]);
+        }
+        std::vector<wvVec> solutionsInOneFlush = loader.cppType2EigenOneFile(inVec);
 
 
+        std::vector<double> photonsPerFlush = loader.photonPerFlushSerial(solutionsInOneFlush);
 
-        std::vector<double> photonsPerFlush=loader.photonPerFlushSerial(solutionsInOneFlush);
 
-
-        std::vector<double> phononsPerFlush=loader.phononPerFlushSerial(solutionsInOneFlush);
-
+        std::vector<double> phononsPerFlush = loader.phononPerFlushSerial(solutionsInOneFlush);
 
 
         photonNumFromAllFlushes.push_back(photonsPerFlush);
         phononNumFromAllFlushes.push_back(phononsPerFlush);
-        const auto tOneFlushEnd{std::chrono::steady_clock::now()};
-    const std::chrono::duration<double> elapsed_secondsAll{tOneFlushEnd - tOneFlushStart};
-    std::cout << "One flush time: " << elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
+
+
+        std::vector<double> photonVals = loader.removeHeadTail(photonNumFromAllFlushes);
+        std::vector<double> phononVals = loader.removeHeadTail(phononNumFromAllFlushes);
+
+        loader.to_json(photonVals, phononVals);
+
+
     }
-
-    std::vector<double> photonVals=loader.removeHeadTail(photonNumFromAllFlushes);
-    std::cout<<photonVals.size()<<std::endl;
-//    loader.solutions = loader.cppType2Eigen();
-
-//    std::vector<double> pn = loader.photonAllSerial();
-//    std::vector<double> ph = loader.phononAllSerial();
-//    loader.printVec(pn);
-//    loader.printVec(ph);
-//loader.to_json(pn,ph);
-
-
-
+    const auto tEnd{std::chrono::steady_clock::now()};
+    const std::chrono::duration<double> elapsed_secondsAll{tEnd - tStart};
+    std::cout << "All flushes time: " << elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
 }
+
+
 
 

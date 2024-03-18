@@ -400,44 +400,44 @@ void DCE_Evolution::initPsiSerial(){
 }
 
 
-///initialize wavefunction in parallel
-void DCE_Evolution::initPsiParallel() {
-    const auto tInitPsiStart{std::chrono::steady_clock::now()};
-    std::vector<std::future<double>> futures;
-    for (int i = 0; i < N1 * N2; i++) {
-        std::future<double> fut = std::async(std::launch::async, &DCE_Evolution::fillOneValInPsi, this, i);
-        futures.push_back(std::move(fut));
-    }
-
-    std::vector<double> retVec;
-    for (auto &fut: futures) {
-        retVec.push_back(fut.get());
-    }
-
-
-    this->Psi0 = wvVec(N1 * N2);
-    for (int i = 0; i < N1 * N2; i++) {
-        this->Psi0(i) = retVec[i];
-    }
-    double nm0=Psi0.norm();
-    Psi0/=nm0;
-    const auto tInitPsiEnd{std::chrono::steady_clock::now()};
-    const std::chrono::duration<double> elapsed_secondsAll{tInitPsiEnd - tInitPsiStart};
-    std::cout<<"init Psi time: "<< elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
-}
+/////initialize wavefunction in parallel
+//void DCE_Evolution::initPsiParallel() {
+//    const auto tInitPsiStart{std::chrono::steady_clock::now()};
+//    std::vector<std::future<double>> futures;
+//    for (int i = 0; i < N1 * N2; i++) {
+//        std::future<double> fut = std::async(std::launch::async, &DCE_Evolution::fillOneValInPsi, this, i);
+//        futures.push_back(std::move(fut));
+//    }
+//
+//    std::vector<double> retVec;
+//    for (auto &fut: futures) {
+//        retVec.push_back(fut.get());
+//    }
+//
+//
+//    this->Psi0 = wvVec(N1 * N2);
+//    for (int i = 0; i < N1 * N2; i++) {
+//        this->Psi0(i) = retVec[i];
+//    }
+//    double nm0=Psi0.norm();
+//    Psi0/=nm0;
+//    const auto tInitPsiEnd{std::chrono::steady_clock::now()};
+//    const std::chrono::duration<double> elapsed_secondsAll{tInitPsiEnd - tInitPsiStart};
+//    std::cout<<"init Psi time: "<< elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
+//}
 
 ///create output directories
 void DCE_Evolution::createOutDir(){
-    const auto tCreatDirStart{std::chrono::steady_clock::now()};
+//    const auto tCreatDirStart{std::chrono::steady_clock::now()};
     this->outDir="./groupNew"+std::to_string(this->groupNum)+"/row"+std::to_string(this->rowNum)+"/";
 
     if(!fs::is_directory(outDir) || !fs::exists(outDir)){
         fs::create_directories(outDir);
     }
 
-    const auto tCreatDirEnd{std::chrono::steady_clock::now()};
-    const std::chrono::duration<double> elapsed_secondsAll{tCreatDirEnd - tCreatDirStart};
-    std::cout<<"create dir time: "<< elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
+//    const auto tCreatDirEnd{std::chrono::steady_clock::now()};
+//    const std::chrono::duration<double> elapsed_secondsAll{tCreatDirEnd - tCreatDirStart};
+//    std::cout<<"create dir time: "<< elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
 
 
 
@@ -447,7 +447,7 @@ void DCE_Evolution::createOutDir(){
 
 ///initialize time indices and dt
 void DCE_Evolution::initTimeInds(){
-    const auto tInitTimeStart{std::chrono::steady_clock::now()};
+//    const auto tInitTimeStart{std::chrono::steady_clock::now()};
     this->tTotPerFlush=this->tFlushStop-this->tFlushStart;
     this->stepsPerFlush=static_cast<int>(std::ceil(tTotPerFlush/dtEst));
     this->dt=tTotPerFlush/static_cast<double >(stepsPerFlush);
@@ -466,9 +466,9 @@ void DCE_Evolution::initTimeInds(){
 //
 //    printVec(tAll);
 
-    const auto tInitTimeEnd{std::chrono::steady_clock::now()};
-    const std::chrono::duration<double> elapsed_secondsAll{tInitTimeEnd - tInitTimeStart};
-    std::cout<<"init time inds time: "<< elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
+//    const auto tInitTimeEnd{std::chrono::steady_clock::now()};
+//    const std::chrono::duration<double> elapsed_secondsAll{tInitTimeEnd - tInitTimeStart};
+//    std::cout<<"init time inds time: "<< elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
 
 
 }
@@ -481,7 +481,7 @@ wvVec DCE_Evolution::evolutionPerFlush(const int &fls, const wvVec& initVec){
     int startingInd=fls*this->stepsPerFlush;
 
     int nextStartingInd=startingInd+stepsPerFlush;
-    std::cout<<"starting loop: "<<startingInd<<", ending loop: "<<nextStartingInd-1<<std::endl;
+//    std::cout<<"starting loop: "<<startingInd<<", ending loop: "<<nextStartingInd-1<<std::endl;
 
     const auto tStart{std::chrono::steady_clock::now()};
     std::unique_ptr<std::vector<wvVec>> PsiPerFlushPtr=std::make_unique<std::vector<wvVec>>();
@@ -508,20 +508,20 @@ wvVec DCE_Evolution::evolutionPerFlush(const int &fls, const wvVec& initVec){
     const std::chrono::duration<double> elapsed_secondsAll{tEnd - tStart};
     std::cout<<"flush "<<fls<<" time: "<< elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
 
-    const auto tOutStart{std::chrono::steady_clock::now()};
+//    const auto tOutStart{std::chrono::steady_clock::now()};
     std::vector<std::vector<std::complex<double>>> outData=this->eigen2cppType(PsiPerFlushPtr);
 
 
     std::string outFile=this->outDir+"flush"+std::to_string(fls)+"N1"+std::to_string(N1)
-            +"N2"+std::to_string(N2)+"L1"+std::to_string(L1)
-            +"L2"+std::to_string(L2)+"solution.bin";
+                        +"N2"+std::to_string(N2)+"L1"+std::to_string(L1)
+                        +"L2"+std::to_string(L2)+"solution.bin";
     std::ofstream ofs(outFile,std::ios::binary);
     msgpack::pack(ofs,outData);
     ofs.close();
 
-    const auto tOutEnd{std::chrono::steady_clock::now()};
-    const std::chrono::duration<double> elapsed_Out{tOutEnd - tOutStart};
-    std::cout<<"Out time: "<< elapsed_Out.count() / 3600.0 << " h" << std::endl;
+//    const auto tOutEnd{std::chrono::steady_clock::now()};
+//    const std::chrono::duration<double> elapsed_Out{tOutEnd - tOutStart};
+//    std::cout<<"Out time: "<< elapsed_Out.count() / 3600.0 << " h" << std::endl;
 
     int length=(*PsiPerFlushPtr).size();
 
@@ -538,14 +538,14 @@ wvVec DCE_Evolution::evolutionPerFlush(const int &fls, const wvVec& initVec){
 /// @return wavefunction after evolution
 wvVec DCE_Evolution::oneStepEvolution(const int& j, const wvVec& PsiCurr) {
 
-    const auto tInitHStart{std::chrono::steady_clock::now()};
+//    const auto tInitHStart{std::chrono::steady_clock::now()};
     Eigen::SparseMatrix<std::complex<double>> HDjMat = HDj(j);
-    const auto tInitHEnd{std::chrono::steady_clock::now()};
-    const std::chrono::duration<double> elapsed_secondsAll{tInitHEnd - tInitHStart};
-    std::cout << "init H: " << elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
+//    const auto tInitHEnd{std::chrono::steady_clock::now()};
+//    const std::chrono::duration<double> elapsed_secondsAll{tInitHEnd - tInitHStart};
+//    std::cout << "init H: " << elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
 
 
-    const auto tSolve_yStart{std::chrono::steady_clock::now()};
+//    const auto tSolve_yStart{std::chrono::steady_clock::now()};
     Eigen::SparseMatrix<std::complex<double>> mat0Tmp = 0.5 * 1i * dt * HDjMat;
     //add scalar 1 to matTmp, i.e., add identity matrix to matTmp
     for (int i = 0; i < N1 * N2; i++) {
@@ -556,20 +556,20 @@ wvVec DCE_Evolution::oneStepEvolution(const int& j, const wvVec& PsiCurr) {
 
     solver.compute(mat0Tmp);
     wvVec y = solver.solve(PsiCurr);
-    const auto tSolve_yEnd{std::chrono::steady_clock::now()};
-    const std::chrono::duration<double> elapsed_Solve_y{tSolve_yEnd - tSolve_yStart};
-    std::cout << "solve y: " << elapsed_Solve_y.count() / 3600.0 << " h" << std::endl;
+//    const auto tSolve_yEnd{std::chrono::steady_clock::now()};
+//    const std::chrono::duration<double> elapsed_Solve_y{tSolve_yEnd - tSolve_yStart};
+//    std::cout << "solve y: " << elapsed_Solve_y.count() / 3600.0 << " h" << std::endl;
 
-    const auto tProdStart{std::chrono::steady_clock::now()};
+//    const auto tProdStart{std::chrono::steady_clock::now()};
     Eigen::SparseMatrix<std::complex<double>> mat1Tmp = -0.5 * 1i * dt * HDjMat;
     for (int i = 0; i < N1 * N2; i++) {
         mat1Tmp.coeffRef(i, i) += 1.0;
     }
 
     wvVec PsiNext = mat1Tmp * y;
-    const auto tProdEnd{std::chrono::steady_clock::now()};
-    const std::chrono::duration<double> elapsedProd{tProdEnd - tProdStart};
-    std::cout << "prod: " << elapsedProd.count() / 3600.0 << " h" << std::endl;
+//    const auto tProdEnd{std::chrono::steady_clock::now()};
+//    const std::chrono::duration<double> elapsedProd{tProdEnd - tProdStart};
+//    std::cout << "prod: " << elapsedProd.count() / 3600.0 << " h" << std::endl;
     return PsiNext;
 
 
@@ -601,11 +601,11 @@ void DCE_Evolution::evolution() {
     std::shared_ptr<wvVec> PsiInitPtr = std::make_shared<wvVec>(this->Psi0);
     std::shared_ptr<wvVec> PsiFinalPtr = std::make_shared<wvVec>(wvVec(N1 * N2));
     for (int fls = 0; fls < this->flushNum; fls++) {
-        std::cout << "======================" << std::endl;
+//        std::cout << "======================" << std::endl;
         *PsiFinalPtr = this->evolutionPerFlush(fls, *PsiInitPtr);
         *PsiInitPtr = *PsiFinalPtr;
 //        std::cout<<"flush "<<fls<<std::endl;
-        std::cout << "=======================================" << std::endl;
+//        std::cout << "=======================================" << std::endl;
 
 
     }
@@ -644,3 +644,5 @@ std::vector<std::vector<std::complex<double>>> DCE_Evolution::eigen2cppType(cons
     return retData;
 
 }
+
+

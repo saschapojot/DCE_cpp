@@ -207,7 +207,7 @@ void combineSegments::catchParameters(const std::string& binFileName){
     this->dx1=2*L1/(static_cast<double>(N1));
      this->dx2=2*L2/(static_cast<double >(N2));
 
-    std::cout<<"N1="<<N1<<", N2="<<N2<<", L1="<<L1<<", L2="<<L2<<std::endl;
+//    std::cout<<"N1="<<N1<<", N2="<<N2<<", L1="<<L1<<", L2="<<L2<<std::endl;
 
     this->parseCSV(groupNum, rowNum);
     for (int n1 =0;n1<N1;n1++){
@@ -273,13 +273,22 @@ void combineSegments::popolateMatrices() {
     //NcMat
     Eigen::SparseMatrix<std::complex<double>> NcPart0 = Eigen::SparseMatrix<std::complex<double>>(N1 * N2, N1 * N2);
 
-    for (int n1 = 0; n1 < N1; n1++) {
-        double x1n1Tmp2 = std::pow(x1ValsAll[n1], 2);
-        int startingPos = n1 * N2;
-        for (int n2 = 0; n2 < N2; n2++) {
-            NcPart0.insert(startingPos + n2, startingPos + n2) = x1n1Tmp2;
+//    for (int n1 = 0; n1 < N1; n1++) {
+//        double x1n1Tmp2 = std::pow(x1ValsAll[n1], 2);
+//        int startingPos = n1 * N2;
+//        for (int n2 = 0; n2 < N2; n2++) {
+//            NcPart0.insert(startingPos + n2, startingPos + n2) = x1n1Tmp2;
+//        }
+//    }
+std::vector<double> x1Squared(x1ValsAll.size(),0);
+for(int n1=0;n1<x1ValsAll.size();n1++){
+    x1Squared[n1]=std::pow(x1ValsAll[n1],2);
+}
+
+        for(int i=0;i<N1*N2;i++){
+            int n1= static_cast<int>(std::floor(static_cast<double >(i)/static_cast<double >(N2)));
+            NcPart0.insert(i,i)=x1Squared[n1];
         }
-    }
 
     NcPart0 *= 0.5 * omegac;
 
@@ -313,12 +322,19 @@ void combineSegments::popolateMatrices() {
         x2ValsSquared.push_back(std::pow(val, 2));
     }
     Eigen::SparseMatrix<std::complex<double>> NmPart0 = Eigen::SparseMatrix<std::complex<double>>(N1 * N2, N1 * N2);
-    for (int n1 = 0; n1 < N1; n1++) {
-        int startingPos = n1 * N2;
-        for (int n2 = 0; n2 < N2; n2++) {
-            NmPart0.insert(startingPos + n2, startingPos + n2) = x2ValsSquared[n2];
-        }
+//    for (int n1 = 0; n1 < N1; n1++) {
+//        int startingPos = n1 * N2;
+//        for (int n2 = 0; n2 < N2; n2++) {
+//            NmPart0.insert(startingPos + n2, startingPos + n2) = x2ValsSquared[n2];
+//        }
+//    }
+    //S2 in diagonal
+    for(int i=0;i<N1*N2;i++){
+        int n2=i%N2;
+        NmPart0.insert(i,i)=x2ValsSquared[n2];
     }
+
+
     NmPart0 *= 0.5 * omegam;
 
     for(int i=0;i<N1*N2;i++){
@@ -326,20 +342,38 @@ void combineSegments::popolateMatrices() {
     }
 
     Eigen::SparseMatrix<std::complex<double>> NmPart1 = Eigen::SparseMatrix<std::complex<double>>(N1 * N2, N1 * N2);
-    for(int n1=0;n1<N1;n1++){
-        int startingPos = n1 * N2;
-        //diagonal
-        for(int n2=0;n2<N2;n2++){
-            NmPart1.insert(startingPos+n2,startingPos+n2)=-2.0;
+//    for(int n1=0;n1<N1;n1++){
+//        int startingPos = n1 * N2;
+//        //diagonal
+//        for(int n2=0;n2<N2;n2++){
+//            NmPart1.insert(startingPos+n2,startingPos+n2)=-2.0;
+//        }
+//        //superdiagonal
+//        for(int n2=0;n2<N2-1;n2++){
+//            NmPart1.insert(startingPos+n2,startingPos+n2+1)=1.0;
+//        }
+//        //subdiagonal
+//        for(int n2=0;n2<N2-1;n2++){
+//            NmPart1.insert(startingPos+n2+1,startingPos+n2)=1.0;
+//        }
+//    }
+std::vector<int> upperRowInds;
+upperRowInds.reserve((N2-1)*N1);
+    for(int n2=0;n2<N1*N2;n2++){
+        if ((n2+1)%N2==0){
+            continue;
+        }else{
+            upperRowInds.push_back(n2);
         }
-        //superdiagonal
-        for(int n2=0;n2<N2-1;n2++){
-            NmPart1.insert(startingPos+n2,startingPos+n2+1)=1.0;
-        }
-        //subdiagonal
-        for(int n2=0;n2<N2-1;n2++){
-            NmPart1.insert(startingPos+n2+1,startingPos+n2)=1.0;
-        }
+    }
+    //diagonal
+    for(int i=0;i<N1*N2;i++){
+        NmPart1.insert(i,i)=-2.0;
+    }
+    //upper and lower diagonal
+    for(const auto&n2:upperRowInds){
+        NmPart1.insert(n2,n2+1)=1.0;
+        NmPart1.insert(n2+1,n2)=1.0;
     }
 
     NmPart1*=-1/(2.0*omegam*std::pow(dx2,2));
@@ -371,6 +405,27 @@ std::vector<wvVec >  combineSegments::cppType2Eigen() {
     return retVec;
 
 }
+
+///
+/// @param solutionsInOneFile vectors containing in one file
+/// @return Eigen's vector
+std::vector<wvVec >combineSegments::cppType2EigenOneFile(const std::vector<std::vector<std::complex<double>>>& solutionsInOneFile){
+
+    std::vector<wvVec> retVec;
+    for(const auto&vec:solutionsInOneFile){
+        int length=vec.size();
+        wvVec vecEigenTmp = wvVec(length);
+        for(int i=0;i<length;i++){
+            vecEigenTmp(i)=vec[i];
+        }
+        retVec.push_back(vecEigenTmp);
+    }
+
+    return retVec;
+
+
+}
+
 
 
 ///
@@ -507,4 +562,85 @@ objPhoton["time"]=timeAll;
     ofsPhonon<<phonon_str<<std::endl;
     ofsPhonon.close();
 
+}
+
+
+///
+/// @param oneFileName one bin file name
+/// @return wavefunctions in this bin file
+std::vector<std::vector<std::complex<double>>> combineSegments::readOneBinFile(const std::string& oneFileName){
+
+std::ifstream file(oneFileName,std::ios::binary);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open file: " << oneFileName << std::endl;
+        exit(1);
+    }
+    // Read the entire file into a std::vector<char>
+
+    std::vector<char> buffer((std::istreambuf_iterator<char>(file)),
+                             std::istreambuf_iterator<char>());
+    // Now, use msgpack to unpack the buffer
+
+    msgpack::object_handle oh =
+            msgpack::unpack(buffer.data(), buffer.size());
+    // Convert the unpacked object to your desired C++ data structure
+    std::vector<std::vector<std::complex<double>>> deserializedData;
+    oh.get().convert(deserializedData);
+
+    std::vector<std::vector<std::complex<double>>> retVec;
+    for(const auto& vec:deserializedData){
+        retVec.push_back(vec);
+    }
+    return retVec;
+
+
+
+}
+
+
+///
+/// @param solutionsPerFlush solutions in one flush
+/// @return photon numbers in one flush
+std::vector<double> combineSegments::photonPerFlushSerial(const std::vector<wvVec >& solutionsPerFlush) {
+
+    std::vector<double> retVec;
+    for (const auto &vec: solutionsPerFlush) {
+        retVec.push_back(this->numOfPhoton(vec));
+    }
+    return retVec;
+
+
+}
+
+
+
+///
+/// @param solutionsPerFlush solutions in one flush
+/// @return phonon numbers in one flush
+std::vector<double> combineSegments::phononPerFlushSerial(const std::vector<wvVec >& solutionsPerFlush){
+    std::vector<double> retVec;
+
+    for(const auto&vec:solutionsPerFlush){
+        retVec.push_back(this->numOfPhonon(vec));
+    }
+    return retVec;
+
+
+}
+///
+/// @param numVecvec photon/phonon numbers
+/// @return duplicated entries removed
+std::vector<double> combineSegments::removeHeadTail(const std::vector<std::vector<double>> &numVecvec){
+    std::vector<double> retVec;
+    for(int i=0;i<numVecvec.size()-1;i++){
+        for(int j=0;j<numVecvec[i].size()-1;j++){
+            retVec.push_back(numVecvec[i][j]);
+        }
+    }
+
+    for(int j=0;j<numVecvec[numVecvec.size()-1].size();j++){
+        retVec.push_back(numVecvec[numVecvec.size()-1][j]);
+    }
+
+    return retVec;
 }

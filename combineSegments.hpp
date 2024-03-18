@@ -15,6 +15,12 @@
 #include <msgpack.hpp>
 #include <Eigen/Sparse>
 #include <boost/json.hpp>
+#include <sstream>
+#include <chrono>
+#include <boost/archive/xml_oarchive.hpp>
+#include <boost/archive/xml_iarchive.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/complex.hpp>
 //#include <future>
 
 
@@ -147,11 +153,23 @@ public:
     /// @param sortedFiles sorted bin files by flush number
     void readBinFiles(const std::vector<std::string>& sortedFiles);
 
+    ///
+    /// @param oneFileName one bin file name
+    /// @return wavefunctions in this bin file
+    std::vector<std::vector<std::complex<double>>> readOneBinFile(const std::string& oneFileName);
+
+
+
     ///fill in NcMat, NmMat
     void popolateMatrices();
 
     ///convert vector to eigen's vector
     std::vector<wvVec >  cppType2Eigen();
+
+    ///
+    /// @param solutionsInOneFile vectors containing in one file
+    /// @return Eigen's vector
+    std::vector<wvVec >cppType2EigenOneFile(const std::vector<std::vector<std::complex<double>>>& solutionsInOneFile);
 
 
     ///
@@ -167,6 +185,11 @@ public:
     /// @return photon numbers at each time
     std::vector<double> photonAllSerial();
 
+    ///
+    /// @param solutionsPerFlush solutions in one flush
+    /// @return photon numbers in one flush
+    std::vector<double> photonPerFlushSerial(const std::vector<wvVec >& solutionsPerFlush);
+
 
     ///
     /// @param vec wavefunction
@@ -180,6 +203,16 @@ public:
     ///
     /// @return phonon numbers at each time
     std::vector<double> phononAllSerial();
+
+    ///
+    /// @param solutionsPerFlush solutions in one flush
+    /// @return phonon numbers in one flush
+    std::vector<double> phononPerFlushSerial(const std::vector<wvVec >& solutionsPerFlush);
+
+    ///
+    /// @param numVecvec photon/phonon numbers
+    /// @return duplicated entries removed
+    std::vector<double> removeHeadTail(const std::vector<std::vector<double>> &numVecvec);
 
     /// write to json
     /// @param photonNumAll all photon numbers

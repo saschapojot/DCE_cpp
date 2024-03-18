@@ -15,14 +15,14 @@
 #include <vector>
 #include <Eigen/Sparse>
 #include <Eigen/Dense>
-//#include <Eigen/SparseLU>
+
 #include <Eigen/IterativeLinearSolvers>
 #include <boost/filesystem.hpp>
 #include <memory>
 #include <msgpack.hpp>
 #include <fstream>
 #include <chrono>
-#include <future>
+
 
 namespace fs = boost::filesystem;
 using namespace std::complex_literals;
@@ -192,6 +192,7 @@ public:
     //evolution and write to file by flush
     wvVec evolutionPerFlush(const int &fls, const wvVec& initVec);
 
+
     ///evolution
     void evolution();
 
@@ -206,6 +207,7 @@ public:
     std::vector<std::vector<std::complex<double>>>eigen2cppType(const std::unique_ptr<std::vector<wvVec >> &solutionsPtr);
 
 };
+
 namespace msgpack {
     MSGPACK_API_VERSION_NAMESPACE(MSGPACK_DEFAULT_API_NS) {
         namespace adaptor {
@@ -237,6 +239,5 @@ namespace msgpack {
         } // namespace adaptor
     } // MSGPACK_API_VERSION_NAMESPACE(MSGPACK_DEFAULT_API_NS)
 } // namespace msgpack
-
 
 #endif //DCE_CPP_TIMEEVOLUTION_HPP

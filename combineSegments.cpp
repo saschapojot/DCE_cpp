@@ -372,6 +372,27 @@ std::vector<wvVec >  combineSegments::cppType2Eigen() {
 
 }
 
+///
+/// @param solutionsInOneFile vectors containing in one file
+/// @return Eigen's vector
+std::vector<wvVec >combineSegments::cppType2EigenOneFile(const std::vector<std::vector<std::complex<double>>>& solutionsInOneFile){
+
+    std::vector<wvVec> retVec;
+    for(const auto&vec:solutionsInOneFile){
+        int length=vec.size();
+        wvVec vecEigenTmp = wvVec(length);
+        for(int i=0;i<length;i++){
+            vecEigenTmp(i)=vec[i];
+        }
+        retVec.push_back(vecEigenTmp);
+    }
+
+    return retVec;
+
+
+}
+
+
 
 ///
 /// @param vec wavefunction
@@ -508,3 +529,66 @@ objPhoton["time"]=timeAll;
     ofsPhonon.close();
 
 }
+
+
+///
+/// @param oneFileName one bin file name
+/// @return wavefunctions in this bin file
+std::vector<std::vector<std::complex<double>>> combineSegments::readOneBinFile(const std::string& oneFileName){
+
+std::ifstream file(oneFileName,std::ios::binary);
+    if (!file.is_open()) {
+        std::cerr << "Failed to open file: " << oneFileName << std::endl;
+        exit(1);
+    }
+    // Read the entire file into a std::vector<char>
+    std::vector<char> buffer((std::istreambuf_iterator<char>(file)),
+                             std::istreambuf_iterator<char>());
+    // Now, use msgpack to unpack the buffer
+    msgpack::object_handle oh =
+            msgpack::unpack(buffer.data(), buffer.size());
+    // Convert the unpacked object to your desired C++ data structure
+    std::vector<std::vector<std::complex<double>>> deserializedData;
+    oh.get().convert(deserializedData);
+
+    std::vector<std::vector<std::complex<double>>> retVec;
+    for(const auto& vec:deserializedData){
+        retVec.push_back(vec);
+    }
+    return retVec;
+
+
+
+}
+
+
+///
+/// @param solutionsPerFlush solutions in one flush
+/// @return photon numbers in one flush
+std::vector<double> combineSegments::photonPerFlushSerial(const std::vector<wvVec >& solutionsPerFlush) {
+
+    std::vector<double> retVec;
+    for (const auto &vec: solutionsPerFlush) {
+        retVec.push_back(this->numOfPhoton(vec));
+    }
+    return retVec;
+
+
+}
+
+
+
+///
+/// @param solutionsPerFlush solutions in one flush
+/// @return phonon numbers in one flush
+std::vector<double> combineSegments::phononPerFlushSerial(const std::vector<wvVec >& solutionsPerFlush){
+    std::vector<double> retVec;
+
+    for(const auto&vec:solutionsPerFlush){
+        retVec.push_back(this->numOfPhonon(vec));
+    }
+    return retVec;
+
+
+}
+

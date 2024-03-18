@@ -9,6 +9,7 @@ include_directories("/home/polya/cppLocal/eigen-3.4.0")
 
 include_directories("/home/polya/cppLocal/msgpack-c-cpp_master/include")
 
+
 set(Boost_NO_SYSTEM_PATHS YES)
 if (Boost_NO_SYSTEM_PATHS)
     set(Boost_ROOT "/home/polya/cppLocal/boostBuild")
@@ -18,7 +19,11 @@ endif (Boost_NO_SYSTEM_PATHS)
 
 add_executable(DCE main.cpp timeEvolution.cpp
         )
-find_package(Boost  REQUIRED filesystem)
+add_executable(num computeNum.cpp combineSegments.cpp)
+
+
+
+find_package(Boost  REQUIRED filesystem json serialization)
 
 
 
@@ -36,10 +41,27 @@ endif()
 set_source_files_properties(
         timeEvolution.cpp
         PROPERTIES
-        COMPILE_OPTIONS "-Ofast"
+        COMPILE_OPTIONS "-O3"
+)
+set_source_files_properties(
+        combineSegments.cpp
+        PROPERTIES
+        COMPILE_OPTIONS "-O3"
+)
+set_source_files_properties(
+        computeNum.cpp
+        PROPERTIES
+        COMPILE_OPTIONS "-O3"
 )
 
 file(GLOB LIBS_A "${Boost_LIBRARY_DIR}/*filesystem.a")
 file(GLOB LIBS_SO "${Boost_LIBRARY_DIR}/*filesystem.so")
 
+target_link_libraries(DCE ${LIBS_A} ${LIBS_SO})
+
+target_link_libraries(num ${LIBS_A} ${LIBS_SO})
+target_link_libraries(num Boost::json)
+
+file(GLOB LIBS_A "${Boost_LIBRARY_DIR}/*serialization.a")
+file(GLOB LIBS_SO "${Boost_LIBRARY_DIR}/*serialization.so")
 target_link_libraries(DCE ${LIBS_A} ${LIBS_SO})

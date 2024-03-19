@@ -30,9 +30,9 @@ if(argc!=3){
         std::string name = sortedFiles[j];
 
         std::vector<std::vector<std::complex<double>>> inVec = loader.readOneBinFile(name);
-        for(const auto& vec:inVec){
-            std::cout<<"norm is "<<loader.checkNorm(vec)<<std::endl;
-        }
+//        for(const auto& vec:inVec){
+//            std::cout<<"norm is "<<loader.checkNorm(vec)<<std::endl;
+//        }
         std::string suffix = "N1" + std::to_string(loader.N1) + "N2" + std::to_string(loader.N2)
                              + "L1" + std::to_string(loader.L1) + "L2" + std::to_string(loader.L2);
 

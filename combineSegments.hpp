@@ -223,6 +223,12 @@ public:
     ///
     /// @param vec initial or final wavefunction
     void writeInitLast(const std::string &filename,std::vector<std::complex<double>>& vec);
+
+
+    ///
+    /// @param vec wavefunction
+    /// @return norm of wavefunction
+    double checkNorm(const std::vector<std::complex<double>>& vec);
 };
 
 

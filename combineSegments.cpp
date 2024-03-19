@@ -280,15 +280,15 @@ void combineSegments::popolateMatrices() {
 //            NcPart0.insert(startingPos + n2, startingPos + n2) = x1n1Tmp2;
 //        }
 //    }
-std::vector<double> x1Squared(x1ValsAll.size(),0);
-for(int n1=0;n1<x1ValsAll.size();n1++){
-    x1Squared[n1]=std::pow(x1ValsAll[n1],2);
-}
+    std::vector<double> x1Squared(x1ValsAll.size(), 0);
+    for (int n1 = 0; n1 < x1ValsAll.size(); n1++) {
+        x1Squared[n1] = std::pow(x1ValsAll[n1], 2);
+    }
 
-        for(int i=0;i<N1*N2;i++){
-            int n1= static_cast<int>(std::floor(static_cast<double >(i)/static_cast<double >(N2)));
-            NcPart0.insert(i,i)=x1Squared[n1];
-        }
+    for (int i = 0; i < N1 * N2; i++) {
+        int n1 = static_cast<int>(std::floor(static_cast<double >(i) / static_cast<double >(N2)));
+        NcPart0.insert(i, i) = x1Squared[n1];
+    }
 
     NcPart0 *= 0.5 * omegac;
 
@@ -329,16 +329,16 @@ for(int n1=0;n1<x1ValsAll.size();n1++){
 //        }
 //    }
     //S2 in diagonal
-    for(int i=0;i<N1*N2;i++){
-        int n2=i%N2;
-        NmPart0.insert(i,i)=x2ValsSquared[n2];
+    for (int i = 0; i < N1 * N2; i++) {
+        int n2 = i % N2;
+        NmPart0.insert(i, i) = x2ValsSquared[n2];
     }
 
 
     NmPart0 *= 0.5 * omegam;
 
-    for(int i=0;i<N1*N2;i++){
-        NmPart0.coeffRef(i,i)+=-0.5;
+    for (int i = 0; i < N1 * N2; i++) {
+        NmPart0.coeffRef(i, i) += -0.5;
     }
 
     Eigen::SparseMatrix<std::complex<double>> NmPart1 = Eigen::SparseMatrix<std::complex<double>>(N1 * N2, N1 * N2);
@@ -357,31 +357,28 @@ for(int n1=0;n1<x1ValsAll.size();n1++){
 //            NmPart1.insert(startingPos+n2+1,startingPos+n2)=1.0;
 //        }
 //    }
-std::vector<int> upperRowInds;
-upperRowInds.reserve((N2-1)*N1);
-    for(int n2=0;n2<N1*N2;n2++){
-        if ((n2+1)%N2==0){
+    std::vector<int> upperRowInds;
+    upperRowInds.reserve((N2 - 1) * N1);
+    for (int n2 = 0; n2 < N1 * N2; n2++) {
+        if ((n2 + 1) % N2 == 0) {
             continue;
-        }else{
+        } else {
             upperRowInds.push_back(n2);
         }
     }
     //diagonal
-    for(int i=0;i<N1*N2;i++){
-        NmPart1.insert(i,i)=-2.0;
+    for (int i = 0; i < N1 * N2; i++) {
+        NmPart1.insert(i, i) = -2.0;
     }
     //upper and lower diagonal
-    for(const auto&n2:upperRowInds){
-        NmPart1.insert(n2,n2+1)=1.0;
-        NmPart1.insert(n2+1,n2)=1.0;
+    for (const auto &n2: upperRowInds) {
+        NmPart1.insert(n2, n2 + 1) = 1.0;
+        NmPart1.insert(n2 + 1, n2) = 1.0;
     }
 
-    NmPart1*=-1/(2.0*omegam*std::pow(dx2,2));
+    NmPart1 *= -1 / (2.0 * omegam * std::pow(dx2, 2));
 
-    this->NmMat=NmPart0+NmPart1;
-
-
-
+    this->NmMat = NmPart0 + NmPart1;
 
 
 }
@@ -655,4 +652,16 @@ void combineSegments::writeInitLast(const std::string &filename,std::vector<std:
     boost::archive::xml_oarchive oa(ofs);
     oa & BOOST_SERIALIZATION_NVP(vec);
 
+}
+
+///
+/// @param vec wavefunction
+/// @return norm of wavefunction
+double combineSegments::checkNorm(const std::vector<std::complex<double>>& vec){
+
+    double val=0;
+    for(const auto&elem:vec){
+        val+=std::abs(std::pow(elem,2));
+    }
+    return std::sqrt(val);
 }

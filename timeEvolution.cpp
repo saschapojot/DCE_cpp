@@ -200,13 +200,7 @@ void DCE_Evolution::populatedMatrices(){
     //H7's upper and lower diagonal indices
     std::vector<int> H7UpperRowInds;
     H7UpperRowInds.reserve((N2-1)*N1);
-    for(int n2=0;n2<N1*N2;n2++){
-        if ((n2+1)%N2==0){
-            continue;
-        }else{
-            H7UpperRowInds.push_back(n2);
-        }
-    }
+    git
     //H7's diagonal
     for(int i=0;i<N1*N2;i++){
         H7.insert(i,i)=-2.0;

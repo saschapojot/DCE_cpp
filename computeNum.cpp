@@ -4,12 +4,12 @@
 #include "combineSegments.hpp"
 
 int main(int argc, char *argv[]) {
-//if(argc!=3){
-//    std::cout << "wrong arguments" << std::endl;
-//    std::exit(2);
-//}
-    int group = 6;
-    int row = 0;
+if(argc!=3){
+    std::cout << "wrong arguments" << std::endl;
+    std::exit(2);
+}
+    int group = std::stoi(argv[1]);
+    int row = std::stoi(argv[2]);
     auto loader = combineSegments(group, row);
     auto strVec = loader.listFiles(loader.outDir);
     auto sortedFiles = loader.sortFiles(strVec);

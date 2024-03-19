@@ -16,8 +16,11 @@ int main(int argc, char *argv[]){
 
     evo.createOutDir();
     evo.initTimeInds();
-
+    const auto tEvoStart{std::chrono::steady_clock::now()};
     evo.evolution();
+    const auto tEvoEnd{std::chrono::steady_clock::now()};
+    const std::chrono::duration<double> elapsed_secondsAll{tEvoEnd - tEvoStart};
+    std::cout<<"Evolution time: "<< elapsed_secondsAll.count() / 3600.0 << " h" << std::endl;
 
 
 
